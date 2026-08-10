@@ -51,6 +51,7 @@ function Exercise({ lesson, position, onComplete }: { lesson: Lesson; position: 
   const [checked, setChecked] = useState(false)
   const [speed, setSpeed] = useState(1)
   const [showVoiceHelp, setShowVoiceHelp] = useState(false)
+  const [voiceHelpPlatform, setVoiceHelpPlatform] = useState<'mac' | 'iphone'>('mac')
   const dictationScore = checked ? scoreAnswer(dictation, lesson.sentence) : 0
   const translationScore = checked ? scoreAnswer(translation, lesson.english) : 0
   const { play, togglePause, state, playbackState } = useLessonAudio(lesson.audio, lesson.sentence, lesson.language, speed)
@@ -68,7 +69,7 @@ function Exercise({ lesson, position, onComplete }: { lesson: Lesson; position: 
           {[0.6, 0.8, 1].map((value) => <button type="button" className={speed === value ? 'selected' : ''} onClick={() => setSpeed(value)} key={value}>{value.toFixed(1)}×</button>)}
         </div>
       </div>
-      {state === 'speech' && <p className="audio-status">Using your browser’s French voice <button type="button" onClick={() => setShowVoiceHelp(true)}>Change</button></p>}
+      {state === 'speech' && <p className="audio-status">Using your browser’s French voice <button type="button" onClick={() => { setVoiceHelpPlatform(/iPhone|iPad/i.test(navigator.userAgent) ? 'iphone' : 'mac'); setShowVoiceHelp(true) }}>Change</button></p>}
       {state === 'unavailable' && <p className="audio-status error">Audio not available yet.</p>}
     </section>
 
@@ -98,17 +99,31 @@ function Exercise({ lesson, position, onComplete }: { lesson: Lesson; position: 
     {showVoiceHelp && <div className="modal-backdrop" role="presentation" onMouseDown={() => setShowVoiceHelp(false)}>
       <section className="voice-modal" role="dialog" aria-modal="true" aria-labelledby="voice-help-title" onMouseDown={(event) => event.stopPropagation()}>
         <button className="modal-close" type="button" aria-label="Close voice instructions" onClick={() => setShowVoiceHelp(false)}>×</button>
-        <p className="eyebrow">Chrome on Mac</p>
+        <div className="platform-tabs" aria-label="Device instructions">
+          <button type="button" className={voiceHelpPlatform === 'mac' ? 'selected' : ''} onClick={() => setVoiceHelpPlatform('mac')}>Chrome on Mac</button>
+          <button type="button" className={voiceHelpPlatform === 'iphone' ? 'selected' : ''} onClick={() => setVoiceHelpPlatform('iphone')}>iPhone</button>
+        </div>
         <h2 id="voice-help-title">Download a better French voice</h2>
-        <ol>
-          <li>Open <strong>System Settings</strong> on your Mac.</li>
-          <li>Choose <strong>Accessibility → Read &amp; Speak</strong>.</li>
-          <li>Set <strong>System speech language</strong> to French (France).</li>
-          <li>Open <strong>System voice</strong>, then choose <strong>Manage Voices</strong>.</li>
-          <li>Expand French (France), preview the voices, and download the one you prefer.</li>
-          <li>Fully quit Chrome with <strong>⌘Q</strong>, reopen it, and return to Echo.</li>
-        </ol>
-        <p className="modal-note">Chrome receives voices from macOS. Echo will prefer an installed French (France) voice after Chrome restarts.</p>
+        {voiceHelpPlatform === 'mac' ? <>
+          <ol>
+            <li>Open <strong>System Settings</strong> on your Mac.</li>
+            <li>Choose <strong>Accessibility → Read &amp; Speak</strong>.</li>
+            <li>Set <strong>System speech language</strong> to French (France).</li>
+            <li>Open <strong>System voice</strong>, then choose <strong>Manage Voices</strong>.</li>
+            <li>Expand French (France), preview the voices, and download the one you prefer.</li>
+            <li>Fully quit Chrome with <strong>⌘Q</strong>, reopen it, and return to Echo.</li>
+          </ol>
+          <p className="modal-note">Chrome receives voices from macOS. Echo will prefer an installed French (France) voice after Chrome restarts.</p>
+        </> : <>
+          <ol>
+            <li>Connect your iPhone to <strong>Wi-Fi</strong>.</li>
+            <li>Open <strong>Settings → Accessibility → Read &amp; Speak</strong>. On some iOS versions this is called <strong>Spoken Content</strong>.</li>
+            <li>Tap <strong>Voices → French → French (France)</strong>.</li>
+            <li>Preview the available voices and tap the download button beside an <strong>Enhanced</strong> or higher-quality voice.</li>
+            <li>Wait for the download to finish, then close and reopen your browser before returning to Echo.</li>
+          </ol>
+          <p className="modal-note">Enhanced voices can be 100 MB or larger. Chrome and Safari on iPhone both use voices installed by iOS.</p>
+        </>}
         <button className="primary" type="button" onClick={() => setShowVoiceHelp(false)}>Got it</button>
       </section>
     </div>}

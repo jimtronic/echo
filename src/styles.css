@@ -68,6 +68,9 @@ textarea::placeholder { color: #a4aaa6; }
 .modal-backdrop { position: fixed; z-index: 10; inset: 0; display: grid; place-items: center; padding: 18px; background: rgba(25, 42, 35, .48); backdrop-filter: blur(3px); }
 .voice-modal { position: relative; width: min(100%, 500px); max-height: calc(100vh - 36px); overflow-y: auto; padding: 28px; border-radius: 20px; background: #fffdf8; box-shadow: 0 24px 70px rgba(20, 36, 29, .25); }
 .voice-modal h2 { margin: 8px 32px 18px 0; color: #214f3e; font: 500 29px/1.15 Georgia, serif; }
+.platform-tabs { display: inline-flex; margin-bottom: 7px; padding: 3px; border-radius: 10px; background: #efeee8; }
+.platform-tabs button { border: 0; border-radius: 8px; padding: 7px 10px; color: #6a7871; background: transparent; font-size: 11px; font-weight: 600; }
+.platform-tabs button.selected { color: #244b3c; background: #fff; box-shadow: 0 1px 5px #d8d5cc; }
 .voice-modal ol { margin: 0; padding-left: 21px; color: #4e6259; font-size: 14px; line-height: 1.55; }
 .voice-modal li + li { margin-top: 9px; }
 .modal-close { position: absolute; top: 16px; right: 17px; width: 32px; height: 32px; border: 0; border-radius: 50%; color: #617168; background: #efeee8; font-size: 23px; line-height: 1; }
