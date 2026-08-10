@@ -1,6 +1,6 @@
 # Echo v0.1
 
-Echo is a small, local listening-first language-learning prototype. Each session presents 10 shuffled phrases from a 1,350-phrase French, Spanish, and German library and follows a simple loop: listen, type what you heard, translate, check, listen again, and continue. Each language includes 150 beginner, 150 intermediate, and 150 advanced phrases.
+Echo is a small, local listening-first language-learning prototype. Each session presents 10 shuffled phrases from a French, Spanish, and German library and follows a simple loop: listen, type what you heard, translate, check, listen again, and continue. French uses a more natural curated collection with 87 beginner, 87 intermediate, and 71 advanced phrases. Spanish and German currently contain 150 phrases per level.
 
 Session selection is variety-aware: it avoids placing phrases from the same sentence family or topic next to one another when possible, and Mixed sessions also alternate levels when possible.
 
@@ -39,8 +39,7 @@ Place lesson recordings under `public/audio/fr/<level>/`, matching each lesson's
 
 ## Project structure
 
-- `src/data/content/fr/*.json` — local lesson packs, currently beginner, intermediate, and advanced
-- `src/data/expandedLessons.ts` — maintainable phrase families used to expand each level to 150
+- `src/data/betterLessons.ts` — curated and templated French lesson collection
 - `src/data/spanishLessons.ts` — 150 phrases per Spanish level
 - `src/data/germanLessons.ts` — 150 phrases per German level
 - `src/data/lessons.ts` — automatic content loading and validation
