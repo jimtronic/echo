@@ -50,6 +50,7 @@ function Exercise({ lesson, position, onComplete }: { lesson: Lesson; position: 
   const [translation, setTranslation] = useState('')
   const [checked, setChecked] = useState(false)
   const [speed, setSpeed] = useState(1)
+  const [showVoiceHelp, setShowVoiceHelp] = useState(false)
   const dictationScore = checked ? scoreAnswer(dictation, lesson.sentence) : 0
   const translationScore = checked ? scoreAnswer(translation, lesson.english) : 0
   const { play, togglePause, state, playbackState } = useLessonAudio(lesson.audio, lesson.sentence, lesson.language, speed)
@@ -67,7 +68,7 @@ function Exercise({ lesson, position, onComplete }: { lesson: Lesson; position: 
           {[0.6, 0.8, 1].map((value) => <button type="button" className={speed === value ? 'selected' : ''} onClick={() => setSpeed(value)} key={value}>{value.toFixed(1)}×</button>)}
         </div>
       </div>
-      {state === 'speech' && <p className="audio-status">Using your browser’s French voice</p>}
+      {state === 'speech' && <p className="audio-status">Using your browser’s French voice <button type="button" onClick={() => setShowVoiceHelp(true)}>Change</button></p>}
       {state === 'unavailable' && <p className="audio-status error">Audio not available yet.</p>}
     </section>
 
@@ -94,6 +95,23 @@ function Exercise({ lesson, position, onComplete }: { lesson: Lesson; position: 
       </div><p className="match-note">Wording overlap: {translationScore}%. This is a text comparison, not a judgment of meaning.</p></div>
       <button className="primary" type="button" onClick={() => onComplete({ dictation: dictationScore, translation: translationScore })}>Next Sentence <span aria-hidden="true">→</span></button>
     </section>}
+    {showVoiceHelp && <div className="modal-backdrop" role="presentation" onMouseDown={() => setShowVoiceHelp(false)}>
+      <section className="voice-modal" role="dialog" aria-modal="true" aria-labelledby="voice-help-title" onMouseDown={(event) => event.stopPropagation()}>
+        <button className="modal-close" type="button" aria-label="Close voice instructions" onClick={() => setShowVoiceHelp(false)}>×</button>
+        <p className="eyebrow">Chrome on Mac</p>
+        <h2 id="voice-help-title">Download a better French voice</h2>
+        <ol>
+          <li>Open <strong>System Settings</strong> on your Mac.</li>
+          <li>Choose <strong>Accessibility → Read &amp; Speak</strong>.</li>
+          <li>Set <strong>System speech language</strong> to French (France).</li>
+          <li>Open <strong>System voice</strong>, then choose <strong>Manage Voices</strong>.</li>
+          <li>Expand French (France), preview the voices, and download the one you prefer.</li>
+          <li>Fully quit Chrome with <strong>⌘Q</strong>, reopen it, and return to Echo.</li>
+        </ol>
+        <p className="modal-note">Chrome receives voices from macOS. Echo will prefer an installed French (France) voice after Chrome restarts.</p>
+        <button className="primary" type="button" onClick={() => setShowVoiceHelp(false)}>Got it</button>
+      </section>
+    </div>}
   </main>
 }
 

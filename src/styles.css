@@ -24,6 +24,7 @@ nav { display: flex; align-items: center; justify-content: space-between; paddin
 .speed button { font-size: 12px; border-radius: 7px; }
 .speed .selected { color: #244b3c; background: #fff; box-shadow: 0 1px 5px #d8d5cc; }
 .audio-status { color: #718278; font-size: 12px; margin: 14px 0 -14px; }
+.audio-status button { border: 0; border-bottom: 1px solid currentColor; padding: 0; color: #315f4c; background: transparent; font-size: inherit; font-weight: 600; }
 .audio-status.error { color: #9d614e; }
 form { display: grid; gap: 18px; }
 label { display: grid; gap: 8px; font-weight: 600; font-size: 14px; }
@@ -64,6 +65,13 @@ textarea::placeholder { color: #a4aaa6; }
 .summary-grid div { display: grid; gap: 5px; padding: 20px 8px; background: #f2f0e9; border-radius: 14px; }
 .summary-grid strong { font: 500 36px Georgia, serif; color: #214f3e; }
 .summary-grid span { color: #728078; font-size: 12px; }
+.modal-backdrop { position: fixed; z-index: 10; inset: 0; display: grid; place-items: center; padding: 18px; background: rgba(25, 42, 35, .48); backdrop-filter: blur(3px); }
+.voice-modal { position: relative; width: min(100%, 500px); max-height: calc(100vh - 36px); overflow-y: auto; padding: 28px; border-radius: 20px; background: #fffdf8; box-shadow: 0 24px 70px rgba(20, 36, 29, .25); }
+.voice-modal h2 { margin: 8px 32px 18px 0; color: #214f3e; font: 500 29px/1.15 Georgia, serif; }
+.voice-modal ol { margin: 0; padding-left: 21px; color: #4e6259; font-size: 14px; line-height: 1.55; }
+.voice-modal li + li { margin-top: 9px; }
+.modal-close { position: absolute; top: 16px; right: 17px; width: 32px; height: 32px; border: 0; border-radius: 50%; color: #617168; background: #efeee8; font-size: 23px; line-height: 1; }
+.modal-note { margin: 20px 0; padding: 12px; border-radius: 10px; color: #6d7b74; background: #f1f0ea; font-size: 12px; line-height: 1.5; }
 footer { text-align: center; color: #88948d; font-family: Georgia, serif; font-style: italic; padding: 28px 0; margin-top: auto; }
 @media (min-width: 640px) { .card { padding: 32px 40px; } .listening { padding-block: 50px 40px; } }
 @media (max-width: 520px) { .summary-grid { grid-template-columns: 1fr; } }
