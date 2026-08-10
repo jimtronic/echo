@@ -6,7 +6,7 @@ import type { Lesson } from './types'
 
 const SESSION_LENGTH = 10
 type LevelChoice = Lesson['level'] | 'mixed'
-type LanguageChoice = 'fr' | 'es'
+type LanguageChoice = 'fr' | 'es' | 'de'
 interface ExerciseResult { dictation: number; translation: number }
 
 function shuffle<T>(items: T[]): T[] {
@@ -19,7 +19,7 @@ function shuffle<T>(items: T[]): T[] {
 }
 
 function phraseFamily(lesson: Lesson): string {
-  const generated = lesson.id.match(/^(?:fr|es)-(?:beginner|intermediate|advanced)-([a-z]+)-(\d+)$/)
+  const generated = lesson.id.match(/^(?:fr|es|de)-(?:beginner|intermediate|advanced)-([a-z]+)-(\d+)$/)
   if (!generated) return lesson.id
   const templateGroup = Math.floor((Number(generated[2]) - 1) / 15)
   return `${lesson.level}-${generated[1]}-${templateGroup}`
@@ -56,8 +56,8 @@ function Exercise({ lesson, position, onComplete }: { lesson: Lesson; position: 
   const dictationScore = checked ? scoreAnswer(dictation, lesson.sentence) : 0
   const translationScore = checked ? scoreAnswer(translation, lesson.english) : 0
   const { play, togglePause, state, playbackState } = useLessonAudio(lesson.audio, lesson.sentence, lesson.language, speed)
-  const languageName = lesson.language === 'es' ? 'Spanish' : 'French'
-  const localeName = lesson.language === 'es' ? 'Spanish (Spain)' : 'French (France)'
+  const languageName = lesson.language === 'es' ? 'Spanish' : lesson.language === 'de' ? 'German' : 'French'
+  const localeName = lesson.language === 'es' ? 'Spanish (Spain)' : lesson.language === 'de' ? 'German (Germany)' : 'French (France)'
 
   const submit = (event: FormEvent) => { event.preventDefault(); setChecked(true) }
 
@@ -160,6 +160,7 @@ export default function App() {
         <select value={language} onChange={(event) => changeLanguage(event.target.value as LanguageChoice)}>
           <option value="fr">French</option>
           <option value="es">Spanish</option>
+          <option value="de">German</option>
         </select>
       </label><label className="level-picker">Level
         <select value={level} onChange={(event) => changeLevel(event.target.value as LevelChoice)}>
@@ -171,7 +172,7 @@ export default function App() {
       </label></div>
     </nav>
     {finished ? <main className="card summary">
-      <p className="eyebrow">Session complete</p><h1>Nice listening.</h1><p className="summary-copy">Take a breath. Notice what felt clearer on the second listen. Your next session will use the {level} {language === 'es' ? 'Spanish' : 'French'} phrase collection.</p>
+      <p className="eyebrow">Session complete</p><h1>Nice listening.</h1><p className="summary-copy">Take a breath. Notice what felt clearer on the second listen. Your next session will use the {level} {language === 'es' ? 'Spanish' : language === 'de' ? 'German' : 'French'} phrase collection.</p>
       <div className="summary-grid"><div><strong>{dictationAverage}%</strong><span>Average dictation</span></div><div><strong>{translationAverage}%</strong><span>Translation match</span></div><div><strong>{scores.length}</strong><span>Exercises completed</span></div></div>
       <button className="primary" type="button" onClick={restart}>Start Another Session</button>
     </main> : <Exercise key={session[position].id} lesson={session[position]} position={position} onComplete={next} />}

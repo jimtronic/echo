@@ -1,11 +1,12 @@
 import type { Lesson } from '../types'
 import { expandedLessons } from './expandedLessons'
 import { spanishLessons } from './spanishLessons'
+import { germanLessons } from './germanLessons'
 
 const modules = import.meta.glob<{ default: Lesson[] }>('./content/fr/*.json', { eager: true })
 
 function loadLessons(): Lesson[] {
-  const loaded = [...Object.values(modules).flatMap((module) => module.default), ...expandedLessons, ...spanishLessons]
+  const loaded = [...Object.values(modules).flatMap((module) => module.default), ...expandedLessons, ...spanishLessons, ...germanLessons]
   const ids = new Set<string>()
 
   for (const lesson of loaded) {
@@ -16,7 +17,7 @@ function loadLessons(): Lesson[] {
     ids.add(lesson.id)
   }
 
-  for (const language of ['fr', 'es']) for (const level of ['beginner', 'intermediate', 'advanced'] as const) {
+  for (const language of ['fr', 'es', 'de']) for (const level of ['beginner', 'intermediate', 'advanced'] as const) {
     const count = loaded.filter((lesson) => lesson.language === language && lesson.level === level).length
     if (count !== 150) throw new Error(`Expected 150 ${language} ${level} lessons, found ${count}`)
   }
