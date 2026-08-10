@@ -15,9 +15,13 @@ nav { display: flex; align-items: center; justify-content: space-between; paddin
 .exercise-header { display: flex; justify-content: space-between; color: #68776e; font-size: 12px; letter-spacing: .07em; text-transform: uppercase; }
 .language { color: #9a6b58; }
 .listening { text-align: center; padding: 43px 0 34px; }
+.play-row { display: grid; grid-template-columns: 1fr 142px 1fr; align-items: center; }
+.play-row .play { grid-column: 2; }
 .play { width: 142px; height: 142px; border-radius: 50%; border: 0; background: #214f3e; color: #fff; box-shadow: 0 13px 28px rgba(33,79,62,.22); font-family: Georgia, serif; font-size: 25px; transition: transform .15s, background .15s; }
 .play:hover { transform: translateY(-2px); background: #173f31; }
 .play span { font-size: 17px; margin-right: 4px; }
+.top-next { grid-column: 3; justify-self: start; margin-left: 13px; border: 1px solid #d7d9d3; border-radius: 10px; padding: 9px 11px; color: #355448; background: #fff; font-size: 12px; font-weight: 600; box-shadow: 0 4px 12px rgba(44, 61, 52, .08); }
+.top-next:hover { border-color: #aab6b0; background: #fafcf9; }
 .audio-options { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 24px; }
 .quiet-button, .speed button { color: #466056; background: transparent; border: 0; padding: 7px 8px; }
 .quiet-button:disabled { cursor: default; opacity: .38; }

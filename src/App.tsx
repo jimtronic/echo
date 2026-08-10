@@ -64,7 +64,10 @@ function Exercise({ lesson, position, onComplete }: { lesson: Lesson; position: 
   return <main className="card">
     <header className="exercise-header"><span>Exercise {position + 1} of {SESSION_LENGTH}</span><span className="language">{languageName} · {lesson.level}</span></header>
     <section className="listening" aria-label="Audio controls">
-      <button className="play" type="button" onClick={() => void play()} aria-label="Play exercise audio"><span aria-hidden="true">▶</span> Play</button>
+      <div className="play-row">
+        <button className="play" type="button" onClick={() => void play()} aria-label="Play exercise audio"><span aria-hidden="true">▶</span> Play</button>
+        {checked && <button className="top-next" type="button" onClick={() => onComplete({ dictation: dictationScore, translation: translationScore })}>Next <span aria-hidden="true">→</span></button>}
+      </div>
       <div className="audio-options">
         <button className="quiet-button" type="button" onClick={() => void play()}>↻ Replay</button>
         <button className="quiet-button" type="button" disabled={playbackState === 'idle'} onClick={() => void togglePause()}>{playbackState === 'paused' ? '▶ Resume' : 'Ⅱ Pause'}</button>
