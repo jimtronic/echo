@@ -59,7 +59,7 @@ function Exercise({ lesson, position, onComplete }: { lesson: Lesson; position: 
   const languageName = lesson.language === 'es' ? 'Spanish' : 'French'
   const localeName = lesson.language === 'es' ? 'Spanish (Spain)' : 'French (France)'
 
-  const submit = (event: FormEvent) => { event.preventDefault(); if (dictation.trim() && translation.trim()) setChecked(true) }
+  const submit = (event: FormEvent) => { event.preventDefault(); setChecked(true) }
 
   return <main className="card">
     <header className="exercise-header"><span>Exercise {position + 1} of {SESSION_LENGTH}</span><span className="language">{languageName} · {lesson.level}</span></header>
@@ -79,7 +79,7 @@ function Exercise({ lesson, position, onComplete }: { lesson: Lesson; position: 
     <form onSubmit={submit}>
       <label>What did you hear?<textarea value={dictation} onChange={(event) => setDictation(event.target.value)} disabled={checked} autoCapitalize="none" spellCheck={false} placeholder={`Type the ${languageName} you heard…`} /></label>
       <label>What does it mean?<textarea value={translation} onChange={(event) => setTranslation(event.target.value)} disabled={checked} placeholder="Type your English translation…" /></label>
-      {!checked && <button className="primary" disabled={!dictation.trim() || !translation.trim()} type="submit">Check Answer</button>}
+      {!checked && <button className="primary" type="submit">Check Answer</button>}
     </form>
 
     {checked && <section className="feedback" aria-live="polite">
