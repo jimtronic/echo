@@ -44,13 +44,14 @@ export function useLessonAudio(audioPath: string, hiddenSentence: string, langua
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel()
       const utterance = new SpeechSynthesisUtterance(hiddenSentence)
-      utterance.lang = language === 'fr' ? 'fr-FR' : language === 'es' ? 'es-ES' : language
+      const preferredLocale = language === 'fr' ? 'fr-FR' : language === 'es' ? 'es-ES' : language
+      utterance.lang = preferredLocale
       utterance.rate = speed
       utterance.onstart = () => mounted.current && setPlaybackState('playing')
       utterance.onend = () => mounted.current && setPlaybackState('idle')
       utterance.onerror = () => mounted.current && setPlaybackState('idle')
       const voices = window.speechSynthesis.getVoices()
-      utterance.voice = voices.find((voice) => voice.lang.toLowerCase() === 'fr-fr')
+      utterance.voice = voices.find((voice) => voice.lang.toLowerCase() === preferredLocale.toLowerCase())
         ?? voices.find((voice) => voice.lang.toLowerCase().startsWith(language))
         ?? null
       if (voices.length > 0 && !utterance.voice && !voices.some((voice) => voice.lang.toLowerCase().startsWith(language))) {
