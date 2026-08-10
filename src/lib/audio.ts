@@ -44,7 +44,7 @@ export function useLessonAudio(audioPath: string, hiddenSentence: string, langua
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel()
       const utterance = new SpeechSynthesisUtterance(hiddenSentence)
-      utterance.lang = language === 'fr' ? 'fr-FR' : language
+      utterance.lang = language === 'fr' ? 'fr-FR' : language === 'es' ? 'es-ES' : language
       utterance.rate = speed
       utterance.onstart = () => mounted.current && setPlaybackState('playing')
       utterance.onend = () => mounted.current && setPlaybackState('idle')
