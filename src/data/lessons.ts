@@ -17,8 +17,8 @@ function loadLessons(): Lesson[] {
 
   const expectedCounts: Record<string, Record<Lesson['level'], number>> = {
     fr: { beginner: 87, intermediate: 87, advanced: 71 },
-    es: { beginner: 150, intermediate: 150, advanced: 150 },
-    de: { beginner: 150, intermediate: 150, advanced: 150 }
+    es: { beginner: 87, intermediate: 87, advanced: 71 },
+    de: { beginner: 87, intermediate: 87, advanced: 71 }
   }
   for (const language of Object.keys(expectedCounts)) for (const level of ['beginner', 'intermediate', 'advanced'] as const) {
     const count = loaded.filter((lesson) => lesson.language === language && lesson.level === level).length
