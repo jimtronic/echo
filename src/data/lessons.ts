@@ -2,9 +2,12 @@ import type { Lesson } from '../types'
 import { frenchLessons } from './betterLessons'
 import { spanishLessons } from './spanishLessons'
 import { germanLessons } from './germanLessons'
+import frenchBeginner01 from './packs/fr-beginner-01.json'
+import frenchBeginner02 from './packs/fr-beginner-02.json'
 
 function loadLessons(): Lesson[] {
-  const loaded = [...frenchLessons, ...spanishLessons, ...germanLessons]
+  const packedFrenchBeginner = [frenchBeginner01, frenchBeginner02].flatMap((pack) => pack.lessons.map((lesson) => ({ ...lesson, language: 'fr', level: 'beginner' as const, packId: pack.id, packOrder: pack.order }) as Lesson))
+  const loaded = [...packedFrenchBeginner, ...frenchLessons.filter((lesson) => lesson.level !== 'beginner'), ...spanishLessons, ...germanLessons]
   const ids = new Set<string>()
 
   for (const lesson of loaded) {
@@ -16,7 +19,7 @@ function loadLessons(): Lesson[] {
   }
 
   const expectedCounts: Record<string, Record<Lesson['level'], number>> = {
-    fr: { beginner: 150, intermediate: 87, advanced: 71 },
+    fr: { beginner: 50, intermediate: 87, advanced: 71 },
     es: { beginner: 87, intermediate: 87, advanced: 71 },
     de: { beginner: 87, intermediate: 87, advanced: 71 }
   }

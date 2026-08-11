@@ -8,6 +8,7 @@ const SESSION_LENGTH = 10
 type LevelChoice = Lesson['level'] | 'mixed'
 type LanguageChoice = 'fr' | 'es' | 'de'
 interface ExerciseResult { dictation: number; translation: number }
+interface CourseProgress { seen: string[]; sessions: number; unlockedPack: number }
 
 function shuffle<T>(items: T[]): T[] {
   const result = [...items]
@@ -46,7 +47,7 @@ function variedSession(pool: Lesson[], mixed: boolean): Lesson[] {
   return selected
 }
 
-function Exercise({ lesson, position, onComplete }: { lesson: Lesson; position: number; onComplete: (result: ExerciseResult) => void }) {
+function Exercise({ lesson, position, onComplete, onEncounter, unlockProgress }: { lesson: Lesson; position: number; onComplete: (result: ExerciseResult) => void; onEncounter: () => void; unlockProgress?: { seen: number; sessions: number; unlocked: boolean } }) {
   const [dictation, setDictation] = useState('')
   const [translation, setTranslation] = useState('')
   const [checked, setChecked] = useState(false)
@@ -54,15 +55,22 @@ function Exercise({ lesson, position, onComplete }: { lesson: Lesson; position: 
   const [showVoiceHelp, setShowVoiceHelp] = useState(false)
   const [voiceHelpPlatform, setVoiceHelpPlatform] = useState<'mac' | 'iphone'>('mac')
   const dictationScore = checked ? scoreAnswer(dictation, lesson.sentence) : 0
-  const translationScore = checked ? scoreAnswer(translation, lesson.english) : 0
+  const translationOptions = [lesson.english, ...(lesson.acceptedTranslations ?? [])]
+  const bestTranslation = translationOptions.reduce((best, option) => scoreAnswer(translation, option) > scoreAnswer(translation, best) ? option : best, lesson.english)
+  const translationScore = checked ? scoreAnswer(translation, bestTranslation) : 0
   const { play, togglePause, state, playbackState } = useLessonAudio(lesson.audio, lesson.sentence, lesson.language, speed)
   const languageName = lesson.language === 'es' ? 'Spanish' : lesson.language === 'de' ? 'German' : 'French'
   const localeName = lesson.language === 'es' ? 'Spanish (Spain)' : lesson.language === 'de' ? 'German (Germany)' : 'French (France)'
 
-  const submit = (event: FormEvent) => { event.preventDefault(); setChecked(true) }
+  const submit = (event: FormEvent) => { event.preventDefault(); setChecked(true); onEncounter() }
 
   return <main className="card">
     <header className="exercise-header"><span>Exercise {position + 1} of {SESSION_LENGTH}</span><span className="language">{languageName} · {lesson.level}</span></header>
+    {unlockProgress && <section className="unlock-progress" aria-label="Progress toward unlocking Pack 2">
+      <div><span>{unlockProgress.unlocked ? 'Pack 2 unlocked' : 'Progress to Pack 2'}</span><strong>{unlockProgress.unlocked ? '100%' : `${Math.round((Math.min(unlockProgress.seen / 20, 1) + Math.min(unlockProgress.sessions / 2, 1)) * 50)}%`}</strong></div>
+      <progress max="100" value={unlockProgress.unlocked ? 100 : (Math.min(unlockProgress.seen / 20, 1) + Math.min(unlockProgress.sessions / 2, 1)) * 50} />
+      <p>{Math.min(unlockProgress.seen, 20)} of 20 phrases · {Math.min(unlockProgress.sessions, 2)} of 2 sessions</p>
+    </section>}
     <section className="listening" aria-label="Audio controls">
       <div className="play-row">
         <button className="play" type="button" onClick={() => void play()} aria-label="Play exercise audio"><span aria-hidden="true">▶</span> Play</button>
@@ -98,7 +106,7 @@ function Exercise({ lesson, position, onComplete }: { lesson: Lesson; position: 
         {diffWords(dictation, lesson.sentence).map((token, index) => <span className={token.kind} key={`${token.text}-${index}`}>{token.text}</span>)}
       </div><div className="legend"><span className="missing">missing</span><span className="incorrect">changed</span><span className="extra">extra</span></div></div>
       <div className="answer-block"><h2>Your translation</h2><div className="diff" aria-label="Translation differences">
-        {diffWords(translation, lesson.english).map((token, index) => <span className={token.kind} key={`${token.text}-${index}`}>{token.text}</span>)}
+        {diffWords(translation, bestTranslation).map((token, index) => <span className={token.kind} key={`${token.text}-${index}`}>{token.text}</span>)}
       </div><p className="match-note">Wording overlap: {translationScore}%. This is a text comparison, not a judgment of meaning.</p></div>
       <button className="primary" type="button" onClick={() => onComplete({ dictation: dictationScore, translation: translationScore })}>Next Sentence <span aria-hidden="true">→</span></button>
     </section>}
@@ -140,21 +148,50 @@ export default function App() {
   const [sessionKey, setSessionKey] = useState(0)
   const [language, setLanguage] = useState<LanguageChoice>('fr')
   const [level, setLevel] = useState<LevelChoice>('beginner')
+  const [packOrder, setPackOrder] = useState(1)
+  const [progress, setProgress] = useState<CourseProgress>(() => {
+    try { return JSON.parse(localStorage.getItem('echo-progress-fr-beginner') ?? '') }
+    catch { return { seen: [], sessions: 0, unlockedPack: 1 } }
+  })
   const session = useMemo(() => {
     const languagePool = lessons.filter((lesson) => lesson.language === language)
-    const pool = level === 'mixed' ? languagePool : languagePool.filter((lesson) => lesson.level === level)
+    let pool = level === 'mixed' ? languagePool : languagePool.filter((lesson) => lesson.level === level)
+    if (language === 'fr' && level === 'beginner') {
+      pool = pool.filter((lesson) => lesson.packOrder === packOrder)
+      const unseen = pool.filter((lesson) => !progress.seen.includes(lesson.id))
+      if (unseen.length >= SESSION_LENGTH) pool = unseen
+    }
     return variedSession(pool, level === 'mixed')
-  }, [language, level, sessionKey])
+  }, [language, level, packOrder, sessionKey])
   const [position, setPosition] = useState(0)
   const [scores, setScores] = useState<ExerciseResult[]>([])
 
-  const next = (result: ExerciseResult) => { setScores((current) => [...current, result]); setPosition((current) => current + 1) }
+  const next = (result: ExerciseResult) => {
+    setScores((current) => [...current, result])
+    if (language === 'fr' && level === 'beginner') {
+      const seen = [...new Set([...progress.seen, session[position].id])]
+      const sessions = progress.sessions + (position === session.length - 1 ? 1 : 0)
+      const unlockedPack = seen.filter((id) => id.startsWith('fr-beginner-01-')).length >= 20 && sessions >= 2 ? 2 : progress.unlockedPack
+      const updated = { seen, sessions, unlockedPack }
+      setProgress(updated)
+      localStorage.setItem('echo-progress-fr-beginner', JSON.stringify(updated))
+    }
+    setPosition((current) => current + 1)
+  }
+  const encounter = () => {
+    if (language !== 'fr' || level !== 'beginner') return
+    const seen = [...new Set([...progress.seen, session[position].id])]
+    const updated = { ...progress, seen }
+    setProgress(updated)
+    localStorage.setItem('echo-progress-fr-beginner', JSON.stringify(updated))
+  }
   const restart = () => { setPosition(0); setScores([]); setSessionKey((key) => key + 1) }
   const changeLevel = (choice: LevelChoice) => { setLevel(choice); setPosition(0); setScores([]); setSessionKey((key) => key + 1) }
-  const changeLanguage = (choice: LanguageChoice) => { setLanguage(choice); setPosition(0); setScores([]); setSessionKey((key) => key + 1) }
+  const changeLanguage = (choice: LanguageChoice) => { setLanguage(choice); setPackOrder(1); setPosition(0); setScores([]); setSessionKey((key) => key + 1) }
   const finished = position >= session.length
   const dictationAverage = scores.length ? Math.round(scores.reduce((sum, result) => sum + result.dictation, 0) / scores.length) : 0
   const translationAverage = scores.length ? Math.round(scores.reduce((sum, result) => sum + result.translation, 0) / scores.length) : 0
+  const packOneSeen = progress.seen.filter((id) => id.startsWith('fr-beginner-01-')).length
 
   return <div className="app-shell">
     <nav>
@@ -172,13 +209,19 @@ export default function App() {
           <option value="intermediate">Intermediate</option>
           <option value="advanced">Advanced</option>
         </select>
-      </label></div>
+      </label>{language === 'fr' && level === 'beginner' && <label className="level-picker">Pack
+        <select value={packOrder} onChange={(event) => { setPackOrder(Number(event.target.value)); setPosition(0); setScores([]); setSessionKey((key) => key + 1) }}>
+          <option value="1">1 · Introductions</option>
+          <option value="2" disabled={progress.unlockedPack < 2}>2 · Café {progress.unlockedPack < 2 ? '🔒' : ''}</option>
+        </select>
+      </label>}</div>
     </nav>
     {finished ? <main className="card summary">
       <p className="eyebrow">Session complete</p><h1>Nice listening.</h1><p className="summary-copy">Take a breath. Notice what felt clearer on the second listen. Your next session will use the {level} {language === 'es' ? 'Spanish' : language === 'de' ? 'German' : 'French'} phrase collection.</p>
+      {language === 'fr' && level === 'beginner' && packOrder === 1 && <p className="course-progress">Pack 1 · {progress.seen.filter((id) => id.startsWith('fr-beginner-01-')).length} of 25 encountered · {progress.sessions} sessions<br />{progress.unlockedPack >= 2 ? 'Pack 2 is unlocked.' : 'Encounter 20 phrases across two sessions to unlock Pack 2.'}</p>}
       <div className="summary-grid"><div><strong>{dictationAverage}%</strong><span>Average dictation</span></div><div><strong>{translationAverage}%</strong><span>Translation match</span></div><div><strong>{scores.length}</strong><span>Exercises completed</span></div></div>
       <button className="primary" type="button" onClick={restart}>Start Another Session</button>
-    </main> : <Exercise key={session[position].id} lesson={session[position]} position={position} onComplete={next} />}
+    </main> : <Exercise key={session[position].id} lesson={session[position]} position={position} onComplete={next} onEncounter={encounter} unlockProgress={language === 'fr' && level === 'beginner' && packOrder === 1 ? { seen: packOneSeen, sessions: progress.sessions, unlocked: progress.unlockedPack >= 2 } : undefined} />}
     <footer>Hear it. Understand it. Make it yours.</footer>
   </div>
 }
