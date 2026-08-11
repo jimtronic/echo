@@ -16,7 +16,7 @@ function loadLessons(): Lesson[] {
   }
 
   const expectedCounts: Record<string, Record<Lesson['level'], number>> = {
-    fr: { beginner: 87, intermediate: 87, advanced: 71 },
+    fr: { beginner: 150, intermediate: 87, advanced: 71 },
     es: { beginner: 87, intermediate: 87, advanced: 71 },
     de: { beginner: 87, intermediate: 87, advanced: 71 }
   }

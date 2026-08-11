@@ -1,6 +1,6 @@
 # Echo v0.1
 
-Echo is a small, local listening-first language-learning prototype. Each session presents 10 shuffled phrases from a curated French, Spanish, and German library and follows a simple loop: listen, type what you heard, translate, check, listen again, and continue. Each language contains 87 beginner, 87 intermediate, and 71 advanced phrases, combining useful repeated constructions with individually authored natural speech.
+Echo is a small, local listening-first language-learning prototype. Each session presents 10 shuffled phrases from a curated French, Spanish, and German library and follows a simple loop: listen, type what you heard, translate, check, listen again, and continue. French beginner currently contains 150 phrases; the remaining language levels contain 87 beginner/intermediate or 71 advanced phrases while the same editorial expansion continues.
 
 Session selection is variety-aware: it avoids placing phrases from the same sentence family or topic next to one another when possible, and Mixed sessions also alternate levels when possible.
 
