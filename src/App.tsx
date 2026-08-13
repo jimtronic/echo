@@ -91,8 +91,8 @@ function Exercise({ lesson, position, mode, onComplete, onEncounter, unlockProgr
 
     <form onSubmit={submit}>
       {!checked && (mode === 'dictation' ?
-        <label>What did you hear?<textarea rows={2} value={dictation} onChange={(event) => setDictation(event.target.value)} disabled={checked} autoCapitalize="none" spellCheck={false} placeholder={`Type the ${languageName} you heard…`} /></label> :
-        <label>What does it mean?<textarea rows={2} value={translation} onChange={(event) => setTranslation(event.target.value)} disabled={checked} placeholder="Type your English translation…" /></label>)}
+        <label>What did you hear?<textarea rows={2} value={dictation} onChange={(event) => setDictation(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); event.currentTarget.form?.requestSubmit() } }} disabled={checked} autoCapitalize="none" spellCheck={false} placeholder={`Type the ${languageName} you heard…`} /></label> :
+        <label>What does it mean?<textarea rows={2} value={translation} onChange={(event) => setTranslation(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); event.currentTarget.form?.requestSubmit() } }} disabled={checked} placeholder="Type your English translation…" /></label>)}
       {checked && <div className="answer-result" aria-live="polite">
         <div className="corrected-answer">
           <h2>{mode === 'dictation' ? 'What did you hear?' : 'What does it mean?'}</h2>
