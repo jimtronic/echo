@@ -6,7 +6,7 @@ import type { Lesson } from './types'
 
 const SESSION_LENGTH = 10
 type LevelChoice = Lesson['level'] | 'mixed'
-type LanguageChoice = 'fr' | 'es' | 'de'
+type LanguageChoice = 'fr' | 'es' | 'es-CO' | 'de'
 type ExerciseMode = 'dictation' | 'translation'
 interface ExerciseResult { score: number }
 interface CourseProgress { seen: string[]; packSessions: Record<number, number>; unlockedPack: number }
@@ -61,8 +61,8 @@ function Exercise({ lesson, position, mode, onComplete, onEncounter, unlockProgr
   const translationScore = checked ? scoreAnswer(translation, bestTranslation) : 0
   const activeScore = mode === 'dictation' ? dictationScore : translationScore
   const { play, togglePause, state, playbackState, voices, selectedVoice, setSelectedVoice } = useLessonAudio(lesson.audio, lesson.sentence, lesson.language, speed)
-  const languageName = lesson.language === 'es' ? 'Spanish' : lesson.language === 'de' ? 'German' : 'French'
-  const localeName = lesson.language === 'es' ? 'Spanish (Spain)' : lesson.language === 'de' ? 'German (Germany)' : 'French (France)'
+  const languageName = lesson.language === 'es-CO' ? 'Latin American Spanish' : lesson.language === 'es' ? 'Spanish' : lesson.language === 'de' ? 'German' : 'French'
+  const localeName = lesson.language === 'es-CO' ? 'Spanish (Colombia)' : lesson.language === 'es' ? 'Spanish (Spain)' : lesson.language === 'de' ? 'German (Germany)' : 'French (France)'
 
   const submit = (event: FormEvent) => { event.preventDefault(); setChecked(true); onEncounter() }
 
@@ -174,15 +174,19 @@ export default function App() {
     try { const saved = JSON.parse(localStorage.getItem('echo-progress-es-beginner') ?? ''); return { seen: saved.seen ?? [], packSessions: saved.packSessions ?? {}, unlockedPack: saved.unlockedPack ?? 1 } }
     catch { return { seen: [], packSessions: {}, unlockedPack: 1 } }
   })
-  const isPackedCourse = (language === 'fr' || language === 'es') && level === 'beginner'
-  const activeProgress = language === 'es' ? spanishProgress : progress
-  const maxPack = language === 'fr' ? 4 : 2
+  const [colombianProgress, setColombianProgress] = useState<CourseProgress>(() => {
+    try { const saved = JSON.parse(localStorage.getItem('echo-progress-es-CO-beginner') ?? ''); return { seen: saved.seen ?? [], packSessions: saved.packSessions ?? {}, unlockedPack: saved.unlockedPack ?? 1 } }
+    catch { return { seen: [], packSessions: {}, unlockedPack: 1 } }
+  })
+  const isPackedCourse = (language === 'fr' || language === 'es' || language === 'es-CO') && level === 'beginner'
+  const activeProgress = language === 'es' ? spanishProgress : language === 'es-CO' ? colombianProgress : progress
+  const maxPack = language === 'fr' ? 4 : language === 'es' ? 2 : 1
   const session = useMemo(() => {
     const languagePool = lessons.filter((lesson) => lesson.language === language)
     let pool = level === 'mixed' ? languagePool : languagePool.filter((lesson) => lesson.level === level)
-    if ((language === 'fr' || language === 'es') && level === 'beginner') {
+    if (isPackedCourse) {
       pool = pool.filter((lesson) => lesson.packOrder === packOrder)
-      const seen = language === 'es' ? spanishProgress.seen : progress.seen
+      const seen = activeProgress.seen
       const unseen = pool.filter((lesson) => !seen.includes(lesson.id))
       if (unseen.length >= SESSION_LENGTH) pool = unseen
     }
@@ -199,7 +203,7 @@ export default function App() {
       const packSeen = seen.filter((id) => id.startsWith(`${language}-beginner-0${packOrder}-`)).length
       const unlockedPack = packSeen >= 20 && packSessions[packOrder] >= 2 ? Math.max(activeProgress.unlockedPack, Math.min(packOrder + 1, maxPack)) : activeProgress.unlockedPack
       const updated = { seen, packSessions, unlockedPack }
-      if (language === 'es') setSpanishProgress(updated); else setProgress(updated)
+      if (language === 'es') setSpanishProgress(updated); else if (language === 'es-CO') setColombianProgress(updated); else setProgress(updated)
       localStorage.setItem(`echo-progress-${language}-beginner`, JSON.stringify(updated))
     }
     setPosition((current) => current + 1)
@@ -208,12 +212,12 @@ export default function App() {
     if (!isPackedCourse) return
     const seen = [...new Set([...activeProgress.seen, session[position].id])]
     const updated = { ...activeProgress, seen }
-    if (language === 'es') setSpanishProgress(updated); else setProgress(updated)
+    if (language === 'es') setSpanishProgress(updated); else if (language === 'es-CO') setColombianProgress(updated); else setProgress(updated)
     localStorage.setItem(`echo-progress-${language}-beginner`, JSON.stringify(updated))
   }
   const restart = () => { setPosition(0); setScores([]); setSessionKey((key) => key + 1) }
   const changeLevel = (choice: LevelChoice) => { setLevel(choice); setPosition(0); setScores([]); setSessionKey((key) => key + 1) }
-  const changeLanguage = (choice: LanguageChoice) => { setLanguage(choice); setPackOrder(1); setPosition(0); setScores([]); setSessionKey((key) => key + 1) }
+  const changeLanguage = (choice: LanguageChoice) => { setLanguage(choice); if (choice === 'es-CO') setLevel('beginner'); setPackOrder(1); setPosition(0); setScores([]); setSessionKey((key) => key + 1) }
   const changeMode = (choice: ExerciseMode) => { setMode(choice); setPosition(0); setScores([]); setSessionKey((key) => key + 1) }
   const finished = position >= session.length
   const averageScore = scores.length ? Math.round(scores.reduce((sum, result) => sum + result.score, 0) / scores.length) : 0
@@ -226,7 +230,8 @@ export default function App() {
       <div className="session-pickers"><label className="level-picker">Language
         <select value={language} onChange={(event) => changeLanguage(event.target.value as LanguageChoice)}>
           <option value="fr">French</option>
-          <option value="es">Spanish</option>
+          <option value="es">Spanish (Spain)</option>
+          <option value="es-CO">Spanish (Latin America)</option>
           <option value="de">German</option>
         </select>
       </label><label className="level-picker">Exercise
@@ -236,10 +241,10 @@ export default function App() {
         </select>
       </label><label className="level-picker">Level
         <select value={level} onChange={(event) => changeLevel(event.target.value as LevelChoice)}>
-          <option value="mixed">Mixed</option>
+          <option value="mixed" disabled={language === 'es-CO'}>Mixed</option>
           <option value="beginner">Beginner</option>
-          <option value="intermediate">Intermediate</option>
-          <option value="advanced">Advanced</option>
+          <option value="intermediate" disabled={language === 'es-CO'}>Intermediate</option>
+          <option value="advanced" disabled={language === 'es-CO'}>Advanced</option>
         </select>
       </label>{isPackedCourse && <label className="level-picker">Pack
         <select value={packOrder} onChange={(event) => { setPackOrder(Number(event.target.value)); setPosition(0); setScores([]); setSessionKey((key) => key + 1) }}>
@@ -254,7 +259,7 @@ export default function App() {
       </label>}</div>
     </nav>
     {finished ? <main className="card summary">
-      <p className="eyebrow">Session complete</p><h1>Nice listening.</h1><p className="summary-copy">Take a breath. Notice what felt clearer on the second listen. Your next session will use the {level} {language === 'es' ? 'Spanish' : language === 'de' ? 'German' : 'French'} phrase collection.</p>
+      <p className="eyebrow">Session complete</p><h1>Nice listening.</h1><p className="summary-copy">Take a breath. Notice what felt clearer on the second listen. Your next session will use the {level} {language === 'es-CO' ? 'Latin American Spanish' : language === 'es' ? 'Spanish' : language === 'de' ? 'German' : 'French'} phrase collection.</p>
       {isPackedCourse && <p className="course-progress">Pack {packOrder} · {currentPackSeen} of 25 encountered · {currentPackSessions} sessions<br />{packOrder < maxPack ? (activeProgress.unlockedPack > packOrder ? `Pack ${packOrder + 1} is unlocked.` : `Encounter 20 phrases across two sessions to unlock Pack ${packOrder + 1}.`) : 'You have reached the newest available pack.'}</p>}
       <div className="summary-grid"><div><strong>{averageScore}%</strong><span>{mode === 'dictation' ? 'Average dictation' : 'Translation match'}</span></div><div><strong>{scores.length}</strong><span>Exercises completed</span></div></div>
       <button className="primary" type="button" onClick={restart}>Start Another Session</button>

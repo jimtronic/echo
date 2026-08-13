@@ -8,11 +8,13 @@ import frenchBeginner03 from './packs/fr-beginner-03.json'
 import frenchBeginner04 from './packs/fr-beginner-04.json'
 import spanishBeginner01 from './packs/es-beginner-01.json'
 import spanishBeginner02 from './packs/es-beginner-02.json'
+import colombianSpanishBeginner01 from './packs/es-co-beginner-01.json'
 
 function loadLessons(): Lesson[] {
   const packedFrenchBeginner = [frenchBeginner01, frenchBeginner02, frenchBeginner03, frenchBeginner04].flatMap((pack) => pack.lessons.map((lesson) => ({ ...lesson, language: 'fr', level: 'beginner' as const, packId: pack.id, packOrder: pack.order }) as Lesson))
   const packedSpanishBeginner = [spanishBeginner01, spanishBeginner02].flatMap((pack) => pack.lessons.map((lesson) => ({ ...lesson, language: 'es', level: 'beginner' as const, packId: pack.id, packOrder: pack.order }) as Lesson))
-  const loaded = [...packedFrenchBeginner, ...packedSpanishBeginner, ...frenchLessons.filter((lesson) => lesson.level !== 'beginner'), ...spanishLessons.filter((lesson) => lesson.level !== 'beginner'), ...germanLessons]
+  const packedColombianSpanishBeginner = colombianSpanishBeginner01.lessons.map((lesson) => ({ ...lesson, language: 'es-CO', level: 'beginner' as const, packId: colombianSpanishBeginner01.id, packOrder: colombianSpanishBeginner01.order }) as Lesson)
+  const loaded = [...packedFrenchBeginner, ...packedSpanishBeginner, ...packedColombianSpanishBeginner, ...frenchLessons.filter((lesson) => lesson.level !== 'beginner'), ...spanishLessons.filter((lesson) => lesson.level !== 'beginner'), ...germanLessons]
   const ids = new Set<string>()
 
   for (const lesson of loaded) {
@@ -26,6 +28,7 @@ function loadLessons(): Lesson[] {
   const expectedCounts: Record<string, Record<Lesson['level'], number>> = {
     fr: { beginner: 100, intermediate: 87, advanced: 71 },
     es: { beginner: 50, intermediate: 87, advanced: 71 },
+    'es-CO': { beginner: 25, intermediate: 0, advanced: 0 },
     de: { beginner: 87, intermediate: 87, advanced: 71 }
   }
   for (const language of Object.keys(expectedCounts)) for (const level of ['beginner', 'intermediate', 'advanced'] as const) {

@@ -1,6 +1,6 @@
 # Echo v0.1
 
-Echo is a small, local listening-first language-learning prototype. Each session presents 10 shuffled phrases from a curated French, Spanish, and German library. French beginner currently has four structured 25-phrase packs, and Spanish beginner has two. The remaining collections contain 87 intermediate lessons or 71 advanced lessons while the editorial expansion continues.
+Echo is a small, local listening-first language-learning prototype. Each session presents 10 shuffled phrases from curated French, Spanish (Spain), Latin American Spanish, and German libraries. French beginner currently has four structured 25-phrase packs, Spanish (Spain) has two, and Latin American Spanish has one Colombian pack. The remaining collections contain 87 intermediate lessons or 71 advanced lessons while the editorial expansion continues.
 
 Session selection is variety-aware: it avoids placing phrases from the same sentence family or topic next to one another when possible, and Mixed sessions also alternate levels when possible.
 

@@ -5,7 +5,7 @@ export function normalize(value: string): string {
   return value
     .toLocaleLowerCase('fr')
     .replace(/[’‘]/g, "'")
-    .replace(/[.,!?¿;:«»"()[\]{}…—–-]/g, ' ')
+    .replace(/[.,!?¡¿;:«»"()[\]{}…—–-]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
 }
