@@ -60,7 +60,7 @@ function Exercise({ lesson, position, mode, onComplete, onEncounter, unlockProgr
   const bestTranslation = translationOptions.reduce((best, option) => scoreAnswer(translation, option) > scoreAnswer(translation, best) ? option : best, lesson.english)
   const translationScore = checked ? scoreAnswer(translation, bestTranslation) : 0
   const activeScore = mode === 'dictation' ? dictationScore : translationScore
-  const { play, togglePause, state, playbackState } = useLessonAudio(lesson.audio, lesson.sentence, lesson.language, speed)
+  const { play, togglePause, state, playbackState, voices, selectedVoice, setSelectedVoice } = useLessonAudio(lesson.audio, lesson.sentence, lesson.language, speed)
   const languageName = lesson.language === 'es' ? 'Spanish' : lesson.language === 'de' ? 'German' : 'French'
   const localeName = lesson.language === 'es' ? 'Spanish (Spain)' : lesson.language === 'de' ? 'German (Germany)' : 'French (France)'
 
@@ -85,7 +85,15 @@ function Exercise({ lesson, position, mode, onComplete, onEncounter, unlockProgr
           {[0.6, 0.8, 1].map((value) => <button type="button" className={speed === value ? 'selected' : ''} onClick={() => setSpeed(value)} key={value}>{value.toFixed(1)}×</button>)}
         </div>
       </div>
-      {state === 'speech' && <p className="audio-status">Using your browser’s {languageName} voice <button type="button" onClick={() => { setVoiceHelpPlatform(/iPhone|iPad/i.test(navigator.userAgent) ? 'iphone' : 'mac'); setShowVoiceHelp(true) }}>Change</button></p>}
+      {state === 'speech' && <div className="voice-choice">
+        <label>Voice
+          <select value={selectedVoice} onChange={(event) => setSelectedVoice(event.target.value)} aria-label={`${languageName} voice`}>
+            <option value="">Browser default</option>
+            {voices.map((voice) => <option value={voice.voiceURI} key={voice.voiceURI}>{voice.name} · {voice.lang}{voice.localService ? '' : ' · online'}</option>)}
+          </select>
+        </label>
+        <button type="button" onClick={() => { setVoiceHelpPlatform(/iPhone|iPad/i.test(navigator.userAgent) ? 'iphone' : 'mac'); setShowVoiceHelp(true) }}>Get more voices</button>
+      </div>}
       {state === 'unavailable' && <p className="audio-status error">Audio not available yet.</p>}
     </section>
 

@@ -38,6 +38,10 @@ nav { display: flex; align-items: center; justify-content: space-between; paddin
 .audio-status { color: #718278; font-size: 12px; margin: 14px 0 -14px; }
 .audio-status button { border: 0; border-bottom: 1px solid currentColor; padding: 0; color: #315f4c; background: transparent; font-size: inherit; font-weight: 600; }
 .audio-status.error { color: #9d614e; }
+.voice-choice { display: flex; align-items: flex-end; justify-content: center; gap: 9px; margin: 13px 0 -15px; }
+.voice-choice label { display: grid; gap: 4px; color: #718278; font-size: 10px; text-align: left; }
+.voice-choice select { max-width: 260px; border: 1px solid #d9d7ce; border-radius: 8px; padding: 6px 8px; color: #355448; background: #fffdf8; font-size: 12px; }
+.voice-choice button { border: 0; border-bottom: 1px solid currentColor; padding: 0 0 6px; color: #315f4c; background: transparent; font-size: 11px; font-weight: 600; }
 form { display: grid; gap: 18px; }
 label { display: grid; gap: 8px; font-weight: 600; font-size: 14px; }
 textarea { width: 100%; min-height: 68px; resize: vertical; border: 1px solid #d9d8d1; border-radius: 12px; padding: 11px 14px; color: #22372f; background: #fff; outline: none; font-size: 18px; line-height: 1.4; }

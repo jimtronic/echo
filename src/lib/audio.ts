@@ -6,7 +6,23 @@ export function useLessonAudio(audioPath: string, hiddenSentence: string, langua
   const audio = useMemo(() => new Audio(audioPath), [audioPath])
   const [state, setState] = useState<AudioState>('checking')
   const [playbackState, setPlaybackState] = useState<'idle' | 'playing' | 'paused'>('idle')
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([])
+  const [selectedVoice, setSelectedVoiceState] = useState(() => localStorage.getItem(`echo-voice-${language}`) ?? '')
   const mounted = useRef(true)
+
+  useEffect(() => {
+    if (!('speechSynthesis' in window)) return
+    const updateVoices = () => setVoices(window.speechSynthesis.getVoices().filter((voice) => voice.lang.toLowerCase().startsWith(language.toLowerCase())))
+    updateVoices()
+    window.speechSynthesis.addEventListener('voiceschanged', updateVoices)
+    return () => window.speechSynthesis.removeEventListener('voiceschanged', updateVoices)
+  }, [language])
+
+  const setSelectedVoice = useCallback((voiceURI: string) => {
+    setSelectedVoiceState(voiceURI)
+    if (voiceURI) localStorage.setItem(`echo-voice-${language}`, voiceURI)
+    else localStorage.removeItem(`echo-voice-${language}`)
+  }, [language])
 
   useEffect(() => {
     mounted.current = true
@@ -50,18 +66,19 @@ export function useLessonAudio(audioPath: string, hiddenSentence: string, langua
       utterance.onstart = () => mounted.current && setPlaybackState('playing')
       utterance.onend = () => mounted.current && setPlaybackState('idle')
       utterance.onerror = () => mounted.current && setPlaybackState('idle')
-      const voices = window.speechSynthesis.getVoices()
-      utterance.voice = voices.find((voice) => voice.lang.toLowerCase() === preferredLocale.toLowerCase())
-        ?? voices.find((voice) => voice.lang.toLowerCase().startsWith(language))
+      const browserVoices = window.speechSynthesis.getVoices()
+      utterance.voice = browserVoices.find((voice) => voice.voiceURI === selectedVoice)
+        ?? browserVoices.find((voice) => voice.lang.toLowerCase() === preferredLocale.toLowerCase())
+        ?? browserVoices.find((voice) => voice.lang.toLowerCase().startsWith(language))
         ?? null
-      if (voices.length > 0 && !utterance.voice && !voices.some((voice) => voice.lang.toLowerCase().startsWith(language))) {
+      if (browserVoices.length > 0 && !utterance.voice && !browserVoices.some((voice) => voice.lang.toLowerCase().startsWith(language))) {
         setState('unavailable')
         return
       }
       window.speechSynthesis.speak(utterance)
       setState('speech')
     }
-  }, [audio, hiddenSentence, language, speed, state])
+  }, [audio, hiddenSentence, language, selectedVoice, speed, state])
 
   const togglePause = useCallback(async () => {
     if (playbackState === 'playing') {
@@ -77,5 +94,5 @@ export function useLessonAudio(audioPath: string, hiddenSentence: string, langua
     }
   }, [audio, playbackState, state])
 
-  return { play, togglePause, state, playbackState }
+  return { play, togglePause, state, playbackState, voices, selectedVoice, setSelectedVoice }
 }
