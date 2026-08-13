@@ -102,6 +102,10 @@ function Exercise({ lesson, position, onComplete, onEncounter, unlockProgress }:
         <div className="answer-heading"><h2>What was said</h2><button className="inline-replay" type="button" onClick={() => void play()} aria-label="Replay exercise audio">↻ Replay</button></div>
         <p lang={lesson.language}>{lesson.sentence}</p><p className="translation">{lesson.english}</p>
       </div>
+      {lesson.notes.length > 0 && <aside className="lesson-notes">
+        <h2>Language notes</h2>
+        <ul>{lesson.notes.map((note) => <li key={note}>{note}</li>)}</ul>
+      </aside>}
       <div className="answer-block"><h2>Your dictation</h2><div className="diff" aria-label="Dictation differences">
         {diffWords(dictation, lesson.sentence).map((token, index) => <span className={token.kind} key={`${token.text}-${index}`}>{token.text}</span>)}
       </div><div className="legend"><span className="missing">missing</span><span className="incorrect">changed</span><span className="extra">extra</span></div></div>
