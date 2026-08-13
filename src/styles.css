@@ -47,15 +47,18 @@ textarea { width: 100%; min-height: 68px; resize: vertical; border: 1px solid #d
 textarea:focus { border-color: #4e7667; box-shadow: 0 0 0 3px rgba(58,109,88,.1); }
 textarea:disabled { color: #52645c; background: #f4f3ef; }
 textarea::placeholder { color: #a4aaa6; }
+.answer-result { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: stretch; }
+.corrected-answer { min-height: 68px; padding: 11px 14px; border: 1px solid #d9d8d1; border-radius: 12px; background: #f4f3ef; }
+.corrected-answer h2 { margin: 0 0 9px; color: #68776e; font-size: 14px; }
+.corrected-answer .diff { font-size: 18px; }
+.corrected-answer .match-note { margin: 10px 0 0; color: #858f89; font-size: 11px; line-height: 1.4; }
+.compact-score { width: 92px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 9px; border-radius: 12px; color: #65756c; background: #f3f1eb; }
+.compact-score strong { font: 500 27px Georgia, serif; color: #1f493a; }
+.compact-score span { margin-top: 2px; font-size: 10px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
 .primary { width: 100%; border: 0; border-radius: 12px; padding: 15px 20px; background: #d66e4b; color: #fff; font-weight: 600; margin-top: 3px; }
 .primary:hover:not(:disabled) { background: #c65d3b; }
 .primary:disabled { cursor: not-allowed; opacity: .42; }
 .feedback { border-top: 1px solid #e3e0d8; margin-top: 23px; padding-top: 23px; display: grid; gap: 18px; }
-.score-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.score { display: grid; gap: 4px; padding: 14px; background: #f3f1eb; border-radius: 13px; }
-.score span { color: #65756c; font-size: 14px; }
-.score small { display: block; margin-top: 2px; color: #929c96; font-size: 9px; font-weight: 500; letter-spacing: .05em; text-transform: uppercase; }
-.score strong { font-family: Georgia, serif; color: #1f493a; font-size: 39px; }
 .answer-block { padding: 16px; border-radius: 13px; background: #f3f1eb; }
 .answer-block h2 { margin: 0 0 9px; color: #718078; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
 .answer-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; }

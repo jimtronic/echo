@@ -90,14 +90,24 @@ function Exercise({ lesson, position, mode, onComplete, onEncounter, unlockProgr
     </section>
 
     <form onSubmit={submit}>
-      {mode === 'dictation' ?
+      {!checked && (mode === 'dictation' ?
         <label>What did you hear?<textarea rows={2} value={dictation} onChange={(event) => setDictation(event.target.value)} disabled={checked} autoCapitalize="none" spellCheck={false} placeholder={`Type the ${languageName} you heard…`} /></label> :
-        <label>What does it mean?<textarea rows={2} value={translation} onChange={(event) => setTranslation(event.target.value)} disabled={checked} placeholder="Type your English translation…" /></label>}
+        <label>What does it mean?<textarea rows={2} value={translation} onChange={(event) => setTranslation(event.target.value)} disabled={checked} placeholder="Type your English translation…" /></label>)}
+      {checked && <div className="answer-result" aria-live="polite">
+        <div className="corrected-answer">
+          <h2>{mode === 'dictation' ? 'What did you hear?' : 'What does it mean?'}</h2>
+          <div className="diff" aria-label={mode === 'dictation' ? 'Dictation differences' : 'Translation differences'}>
+            {diffWords(mode === 'dictation' ? dictation : translation, mode === 'dictation' ? lesson.sentence : bestTranslation).map((token, index) => <span className={token.kind} key={`${token.text}-${index}`}>{token.text}</span>)}
+          </div>
+          {mode === 'dictation' ? <div className="legend"><span className="missing">missing</span><span className="incorrect">changed</span><span className="extra">extra</span></div> :
+            <p className="match-note">Text comparison only; natural alternative wording may score lower.</p>}
+        </div>
+        <div className="compact-score"><strong>{activeScore}%</strong><span>{mode === 'dictation' ? 'Dictation' : 'Match'}</span></div>
+      </div>}
       {!checked && <button className="primary" type="submit">Check Answer</button>}
     </form>
 
     {checked && <section className="feedback" aria-live="polite">
-      <div className="score"><span>{mode === 'dictation' ? 'Dictation score' : <>Translation match <small>approximate</small></>}</span><strong>{activeScore}%</strong></div>
       <div className="answer-block">
         <div className="answer-heading"><h2>What was said</h2><button className="inline-replay" type="button" onClick={() => void play()} aria-label="Replay exercise audio">↻ Replay</button></div>
         <p lang={lesson.language}>{lesson.sentence}</p><p className="translation">{lesson.english}</p>
@@ -106,12 +116,6 @@ function Exercise({ lesson, position, mode, onComplete, onEncounter, unlockProgr
         <h2>Language notes</h2>
         <ul>{lesson.notes.map((note) => <li key={note}>{note}</li>)}</ul>
       </aside>}
-      {mode === 'dictation' ? <div className="answer-block"><h2>Your dictation</h2><div className="diff" aria-label="Dictation differences">
-        {diffWords(dictation, lesson.sentence).map((token, index) => <span className={token.kind} key={`${token.text}-${index}`}>{token.text}</span>)}
-      </div><div className="legend"><span className="missing">missing</span><span className="incorrect">changed</span><span className="extra">extra</span></div></div> :
-      <div className="answer-block"><h2>Your translation</h2><div className="diff" aria-label="Translation differences">
-        {diffWords(translation, bestTranslation).map((token, index) => <span className={token.kind} key={`${token.text}-${index}`}>{token.text}</span>)}
-      </div><p className="match-note">Wording overlap: {translationScore}%. This is a text comparison, not a judgment of meaning.</p></div>}
       <button className="primary" type="button" onClick={() => onComplete({ score: activeScore })}>Next Sentence <span aria-hidden="true">→</span></button>
     </section>}
     {showVoiceHelp && <div className="modal-backdrop" role="presentation" onMouseDown={() => setShowVoiceHelp(false)}>
