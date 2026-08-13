@@ -180,7 +180,7 @@ export default function App() {
   })
   const isPackedCourse = (language === 'fr' || language === 'es' || language === 'es-CO') && level === 'beginner'
   const activeProgress = language === 'es' ? spanishProgress : language === 'es-CO' ? colombianProgress : progress
-  const maxPack = language === 'fr' ? 4 : language === 'es' ? 2 : 1
+  const maxPack = language === 'fr' ? 4 : 2
   const session = useMemo(() => {
     const languagePool = lessons.filter((lesson) => lesson.language === language)
     let pool = level === 'mixed' ? languagePool : languagePool.filter((lesson) => lesson.level === level)
@@ -200,7 +200,7 @@ export default function App() {
     if (isPackedCourse) {
       const seen = [...new Set([...activeProgress.seen, session[position].id])]
       const packSessions = { ...activeProgress.packSessions, [packOrder]: (activeProgress.packSessions[packOrder] ?? 0) + (position === session.length - 1 ? 1 : 0) }
-      const packSeen = seen.filter((id) => id.startsWith(`${language}-beginner-0${packOrder}-`)).length
+      const packSeen = lessons.filter((lesson) => lesson.language === language && lesson.level === 'beginner' && lesson.packOrder === packOrder && seen.includes(lesson.id)).length
       const unlockedPack = packSeen >= 20 && packSessions[packOrder] >= 2 ? Math.max(activeProgress.unlockedPack, Math.min(packOrder + 1, maxPack)) : activeProgress.unlockedPack
       const updated = { seen, packSessions, unlockedPack }
       if (language === 'es') setSpanishProgress(updated); else if (language === 'es-CO') setColombianProgress(updated); else setProgress(updated)
@@ -221,7 +221,7 @@ export default function App() {
   const changeMode = (choice: ExerciseMode) => { setMode(choice); setPosition(0); setScores([]); setSessionKey((key) => key + 1) }
   const finished = position >= session.length
   const averageScore = scores.length ? Math.round(scores.reduce((sum, result) => sum + result.score, 0) / scores.length) : 0
-  const currentPackSeen = activeProgress.seen.filter((id) => id.startsWith(`${language}-beginner-0${packOrder}-`)).length
+  const currentPackSeen = lessons.filter((lesson) => lesson.language === language && lesson.level === 'beginner' && lesson.packOrder === packOrder && activeProgress.seen.includes(lesson.id)).length
   const currentPackSessions = activeProgress.packSessions[packOrder] ?? 0
 
   return <div className="app-shell">
@@ -255,6 +255,7 @@ export default function App() {
             <option value="4" disabled={progress.unlockedPack < 4}>4 · Transport {progress.unlockedPack < 4 ? '🔒' : ''}</option>
           </>}
           {language === 'es' && <option value="2" disabled={spanishProgress.unlockedPack < 2}>2 · Café {spanishProgress.unlockedPack < 2 ? '🔒' : ''}</option>}
+          {language === 'es-CO' && <option value="2" disabled={colombianProgress.unlockedPack < 2}>2 · Landscape painting {colombianProgress.unlockedPack < 2 ? '🔒' : ''}</option>}
         </select>
       </label>}</div>
     </nav>
