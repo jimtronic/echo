@@ -7,7 +7,8 @@ import type { Lesson } from './types'
 const SESSION_LENGTH = 10
 type LevelChoice = Lesson['level'] | 'mixed'
 type LanguageChoice = 'fr' | 'es' | 'de'
-interface ExerciseResult { dictation: number; translation: number }
+type ExerciseMode = 'dictation' | 'translation'
+interface ExerciseResult { score: number }
 interface CourseProgress { seen: string[]; packSessions: Record<number, number>; unlockedPack: number }
 
 function shuffle<T>(items: T[]): T[] {
@@ -47,7 +48,7 @@ function variedSession(pool: Lesson[], mixed: boolean): Lesson[] {
   return selected
 }
 
-function Exercise({ lesson, position, onComplete, onEncounter, unlockProgress }: { lesson: Lesson; position: number; onComplete: (result: ExerciseResult) => void; onEncounter: () => void; unlockProgress?: { seen: number; sessions: number; unlocked: boolean; nextPack: number } }) {
+function Exercise({ lesson, position, mode, onComplete, onEncounter, unlockProgress }: { lesson: Lesson; position: number; mode: ExerciseMode; onComplete: (result: ExerciseResult) => void; onEncounter: () => void; unlockProgress?: { seen: number; sessions: number; unlocked: boolean; nextPack: number } }) {
   const [dictation, setDictation] = useState('')
   const [translation, setTranslation] = useState('')
   const [checked, setChecked] = useState(false)
@@ -58,6 +59,7 @@ function Exercise({ lesson, position, onComplete, onEncounter, unlockProgress }:
   const translationOptions = [lesson.english, ...(lesson.acceptedTranslations ?? [])]
   const bestTranslation = translationOptions.reduce((best, option) => scoreAnswer(translation, option) > scoreAnswer(translation, best) ? option : best, lesson.english)
   const translationScore = checked ? scoreAnswer(translation, bestTranslation) : 0
+  const activeScore = mode === 'dictation' ? dictationScore : translationScore
   const { play, togglePause, state, playbackState } = useLessonAudio(lesson.audio, lesson.sentence, lesson.language, speed)
   const languageName = lesson.language === 'es' ? 'Spanish' : lesson.language === 'de' ? 'German' : 'French'
   const localeName = lesson.language === 'es' ? 'Spanish (Spain)' : lesson.language === 'de' ? 'German (Germany)' : 'French (France)'
@@ -74,7 +76,7 @@ function Exercise({ lesson, position, onComplete, onEncounter, unlockProgress }:
     <section className="listening" aria-label="Audio controls">
       <div className="play-row">
         <button className="play" type="button" onClick={() => void play()} aria-label="Play exercise audio"><span aria-hidden="true">▶</span> Play</button>
-        {checked && <button className="top-next" type="button" onClick={() => onComplete({ dictation: dictationScore, translation: translationScore })}>Next <span aria-hidden="true">→</span></button>}
+        {checked && <button className="top-next" type="button" onClick={() => onComplete({ score: activeScore })}>Next <span aria-hidden="true">→</span></button>}
       </div>
       <div className="audio-options">
         <button className="quiet-button" type="button" onClick={() => void play()}>↻ Replay</button>
@@ -88,16 +90,14 @@ function Exercise({ lesson, position, onComplete, onEncounter, unlockProgress }:
     </section>
 
     <form onSubmit={submit}>
-      <label>What did you hear?<textarea rows={2} value={dictation} onChange={(event) => setDictation(event.target.value)} disabled={checked} autoCapitalize="none" spellCheck={false} placeholder={`Type the ${languageName} you heard…`} /></label>
-      <label>What does it mean?<textarea rows={2} value={translation} onChange={(event) => setTranslation(event.target.value)} disabled={checked} placeholder="Type your English translation…" /></label>
+      {mode === 'dictation' ?
+        <label>What did you hear?<textarea rows={2} value={dictation} onChange={(event) => setDictation(event.target.value)} disabled={checked} autoCapitalize="none" spellCheck={false} placeholder={`Type the ${languageName} you heard…`} /></label> :
+        <label>What does it mean?<textarea rows={2} value={translation} onChange={(event) => setTranslation(event.target.value)} disabled={checked} placeholder="Type your English translation…" /></label>}
       {!checked && <button className="primary" type="submit">Check Answer</button>}
     </form>
 
     {checked && <section className="feedback" aria-live="polite">
-      <div className="score-pair">
-        <div className="score"><span>Dictation score</span><strong>{dictationScore}%</strong></div>
-        <div className="score"><span>Translation match <small>approximate</small></span><strong>{translationScore}%</strong></div>
-      </div>
+      <div className="score"><span>{mode === 'dictation' ? 'Dictation score' : <>Translation match <small>approximate</small></>}</span><strong>{activeScore}%</strong></div>
       <div className="answer-block">
         <div className="answer-heading"><h2>What was said</h2><button className="inline-replay" type="button" onClick={() => void play()} aria-label="Replay exercise audio">↻ Replay</button></div>
         <p lang={lesson.language}>{lesson.sentence}</p><p className="translation">{lesson.english}</p>
@@ -106,13 +106,13 @@ function Exercise({ lesson, position, onComplete, onEncounter, unlockProgress }:
         <h2>Language notes</h2>
         <ul>{lesson.notes.map((note) => <li key={note}>{note}</li>)}</ul>
       </aside>}
-      <div className="answer-block"><h2>Your dictation</h2><div className="diff" aria-label="Dictation differences">
+      {mode === 'dictation' ? <div className="answer-block"><h2>Your dictation</h2><div className="diff" aria-label="Dictation differences">
         {diffWords(dictation, lesson.sentence).map((token, index) => <span className={token.kind} key={`${token.text}-${index}`}>{token.text}</span>)}
-      </div><div className="legend"><span className="missing">missing</span><span className="incorrect">changed</span><span className="extra">extra</span></div></div>
+      </div><div className="legend"><span className="missing">missing</span><span className="incorrect">changed</span><span className="extra">extra</span></div></div> :
       <div className="answer-block"><h2>Your translation</h2><div className="diff" aria-label="Translation differences">
         {diffWords(translation, bestTranslation).map((token, index) => <span className={token.kind} key={`${token.text}-${index}`}>{token.text}</span>)}
-      </div><p className="match-note">Wording overlap: {translationScore}%. This is a text comparison, not a judgment of meaning.</p></div>
-      <button className="primary" type="button" onClick={() => onComplete({ dictation: dictationScore, translation: translationScore })}>Next Sentence <span aria-hidden="true">→</span></button>
+      </div><p className="match-note">Wording overlap: {translationScore}%. This is a text comparison, not a judgment of meaning.</p></div>}
+      <button className="primary" type="button" onClick={() => onComplete({ score: activeScore })}>Next Sentence <span aria-hidden="true">→</span></button>
     </section>}
     {showVoiceHelp && <div className="modal-backdrop" role="presentation" onMouseDown={() => setShowVoiceHelp(false)}>
       <section className="voice-modal" role="dialog" aria-modal="true" aria-labelledby="voice-help-title" onMouseDown={(event) => event.stopPropagation()}>
@@ -152,6 +152,7 @@ export default function App() {
   const [sessionKey, setSessionKey] = useState(0)
   const [language, setLanguage] = useState<LanguageChoice>('fr')
   const [level, setLevel] = useState<LevelChoice>('beginner')
+  const [mode, setMode] = useState<ExerciseMode>('dictation')
   const [packOrder, setPackOrder] = useState(1)
   const [progress, setProgress] = useState<CourseProgress>(() => {
     try { const saved = JSON.parse(localStorage.getItem('echo-progress-fr-beginner') ?? ''); return { seen: saved.seen ?? [], packSessions: saved.packSessions ?? { 1: saved.sessions ?? 0 }, unlockedPack: saved.unlockedPack ?? 1 } }
@@ -193,9 +194,9 @@ export default function App() {
   const restart = () => { setPosition(0); setScores([]); setSessionKey((key) => key + 1) }
   const changeLevel = (choice: LevelChoice) => { setLevel(choice); setPosition(0); setScores([]); setSessionKey((key) => key + 1) }
   const changeLanguage = (choice: LanguageChoice) => { setLanguage(choice); setPackOrder(1); setPosition(0); setScores([]); setSessionKey((key) => key + 1) }
+  const changeMode = (choice: ExerciseMode) => { setMode(choice); setPosition(0); setScores([]); setSessionKey((key) => key + 1) }
   const finished = position >= session.length
-  const dictationAverage = scores.length ? Math.round(scores.reduce((sum, result) => sum + result.dictation, 0) / scores.length) : 0
-  const translationAverage = scores.length ? Math.round(scores.reduce((sum, result) => sum + result.translation, 0) / scores.length) : 0
+  const averageScore = scores.length ? Math.round(scores.reduce((sum, result) => sum + result.score, 0) / scores.length) : 0
   const currentPackSeen = progress.seen.filter((id) => id.startsWith(`fr-beginner-0${packOrder}-`)).length
   const currentPackSessions = progress.packSessions[packOrder] ?? 0
 
@@ -224,12 +225,16 @@ export default function App() {
         </select>
       </label>}</div>
     </nav>
+    <div className="mode-switch" aria-label="Exercise mode">
+      <button type="button" className={mode === 'dictation' ? 'selected' : ''} aria-pressed={mode === 'dictation'} onClick={() => changeMode('dictation')}>Dictation</button>
+      <button type="button" className={mode === 'translation' ? 'selected' : ''} aria-pressed={mode === 'translation'} onClick={() => changeMode('translation')}>Translation</button>
+    </div>
     {finished ? <main className="card summary">
       <p className="eyebrow">Session complete</p><h1>Nice listening.</h1><p className="summary-copy">Take a breath. Notice what felt clearer on the second listen. Your next session will use the {level} {language === 'es' ? 'Spanish' : language === 'de' ? 'German' : 'French'} phrase collection.</p>
       {language === 'fr' && level === 'beginner' && <p className="course-progress">Pack {packOrder} · {currentPackSeen} of 25 encountered · {currentPackSessions} sessions<br />{packOrder < 4 ? (progress.unlockedPack > packOrder ? `Pack ${packOrder + 1} is unlocked.` : `Encounter 20 phrases across two sessions to unlock Pack ${packOrder + 1}.`) : 'You have reached the newest available pack.'}</p>}
-      <div className="summary-grid"><div><strong>{dictationAverage}%</strong><span>Average dictation</span></div><div><strong>{translationAverage}%</strong><span>Translation match</span></div><div><strong>{scores.length}</strong><span>Exercises completed</span></div></div>
+      <div className="summary-grid"><div><strong>{averageScore}%</strong><span>{mode === 'dictation' ? 'Average dictation' : 'Translation match'}</span></div><div><strong>{scores.length}</strong><span>Exercises completed</span></div></div>
       <button className="primary" type="button" onClick={restart}>Start Another Session</button>
-    </main> : <Exercise key={session[position].id} lesson={session[position]} position={position} onComplete={next} onEncounter={encounter} unlockProgress={language === 'fr' && level === 'beginner' && packOrder < 4 ? { seen: currentPackSeen, sessions: currentPackSessions, unlocked: progress.unlockedPack > packOrder, nextPack: packOrder + 1 } : undefined} />}
+    </main> : <Exercise key={`${session[position].id}-${mode}`} lesson={session[position]} position={position} mode={mode} onComplete={next} onEncounter={encounter} unlockProgress={language === 'fr' && level === 'beginner' && packOrder < 4 ? { seen: currentPackSeen, sessions: currentPackSessions, unlocked: progress.unlockedPack > packOrder, nextPack: packOrder + 1 } : undefined} />}
     <footer>Hear it. Understand it. Make it yours.</footer>
   </div>
 }
