@@ -88,8 +88,8 @@ function Exercise({ lesson, position, onComplete, onEncounter, unlockProgress }:
     </section>
 
     <form onSubmit={submit}>
-      <label>What did you hear?<textarea value={dictation} onChange={(event) => setDictation(event.target.value)} disabled={checked} autoCapitalize="none" spellCheck={false} placeholder={`Type the ${languageName} you heard…`} /></label>
-      <label>What does it mean?<textarea value={translation} onChange={(event) => setTranslation(event.target.value)} disabled={checked} placeholder="Type your English translation…" /></label>
+      <label>What did you hear?<textarea rows={2} value={dictation} onChange={(event) => setDictation(event.target.value)} disabled={checked} autoCapitalize="none" spellCheck={false} placeholder={`Type the ${languageName} you heard…`} /></label>
+      <label>What does it mean?<textarea rows={2} value={translation} onChange={(event) => setTranslation(event.target.value)} disabled={checked} placeholder="Type your English translation…" /></label>
       {!checked && <button className="primary" type="submit">Check Answer</button>}
     </form>
 

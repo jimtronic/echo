@@ -40,7 +40,7 @@ nav { display: flex; align-items: center; justify-content: space-between; paddin
 .audio-status.error { color: #9d614e; }
 form { display: grid; gap: 18px; }
 label { display: grid; gap: 8px; font-weight: 600; font-size: 14px; }
-textarea { width: 100%; min-height: 82px; resize: vertical; border: 1px solid #d9d8d1; border-radius: 12px; padding: 13px 14px; color: #22372f; background: #fff; outline: none; line-height: 1.45; }
+textarea { width: 100%; min-height: 68px; resize: vertical; border: 1px solid #d9d8d1; border-radius: 12px; padding: 11px 14px; color: #22372f; background: #fff; outline: none; font-size: 18px; line-height: 1.4; }
 textarea:focus { border-color: #4e7667; box-shadow: 0 0 0 3px rgba(58,109,88,.1); }
 textarea:disabled { color: #52645c; background: #f4f3ef; }
 textarea::placeholder { color: #a4aaa6; }
