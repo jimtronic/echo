@@ -74,7 +74,7 @@ textarea::placeholder { color: #a4aaa6; }
 .diff span, .legend span { padding: 2px 5px; border-radius: 5px; }
 .correct { padding-inline: 1px !important; }
 .missing { color: #815d23; background: #fff0c7; border-bottom: 2px dashed #d29a30; }
-.incorrect { color: #8d4038; background: #f8d8d4; text-decoration: line-through; text-decoration-thickness: 1px; }
+.incorrect { color: #8d4038; background: #f8d8d4; }
 .extra { color: #6e557a; background: #eadff0; text-decoration: line-through; }
 .legend { display: flex; gap: 7px; margin-top: 12px; color: #77817b; font-size: 10px; }
 .answer-block .match-note { margin-top: 12px; color: #858f89; font-size: 11px; line-height: 1.45; }
