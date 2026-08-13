@@ -6,10 +6,12 @@ import frenchBeginner01 from './packs/fr-beginner-01.json'
 import frenchBeginner02 from './packs/fr-beginner-02.json'
 import frenchBeginner03 from './packs/fr-beginner-03.json'
 import frenchBeginner04 from './packs/fr-beginner-04.json'
+import spanishBeginner01 from './packs/es-beginner-01.json'
 
 function loadLessons(): Lesson[] {
   const packedFrenchBeginner = [frenchBeginner01, frenchBeginner02, frenchBeginner03, frenchBeginner04].flatMap((pack) => pack.lessons.map((lesson) => ({ ...lesson, language: 'fr', level: 'beginner' as const, packId: pack.id, packOrder: pack.order }) as Lesson))
-  const loaded = [...packedFrenchBeginner, ...frenchLessons.filter((lesson) => lesson.level !== 'beginner'), ...spanishLessons, ...germanLessons]
+  const packedSpanishBeginner = spanishBeginner01.lessons.map((lesson) => ({ ...lesson, language: 'es', level: 'beginner' as const, packId: spanishBeginner01.id, packOrder: spanishBeginner01.order }) as Lesson)
+  const loaded = [...packedFrenchBeginner, ...packedSpanishBeginner, ...frenchLessons.filter((lesson) => lesson.level !== 'beginner'), ...spanishLessons.filter((lesson) => lesson.level !== 'beginner'), ...germanLessons]
   const ids = new Set<string>()
 
   for (const lesson of loaded) {
@@ -22,7 +24,7 @@ function loadLessons(): Lesson[] {
 
   const expectedCounts: Record<string, Record<Lesson['level'], number>> = {
     fr: { beginner: 100, intermediate: 87, advanced: 71 },
-    es: { beginner: 87, intermediate: 87, advanced: 71 },
+    es: { beginner: 25, intermediate: 87, advanced: 71 },
     de: { beginner: 87, intermediate: 87, advanced: 71 }
   }
   for (const language of Object.keys(expectedCounts)) for (const level of ['beginner', 'intermediate', 'advanced'] as const) {

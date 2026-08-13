@@ -170,12 +170,20 @@ export default function App() {
     try { const saved = JSON.parse(localStorage.getItem('echo-progress-fr-beginner') ?? ''); return { seen: saved.seen ?? [], packSessions: saved.packSessions ?? { 1: saved.sessions ?? 0 }, unlockedPack: saved.unlockedPack ?? 1 } }
     catch { return { seen: [], packSessions: {}, unlockedPack: 1 } }
   })
+  const [spanishProgress, setSpanishProgress] = useState<CourseProgress>(() => {
+    try { const saved = JSON.parse(localStorage.getItem('echo-progress-es-beginner') ?? ''); return { seen: saved.seen ?? [], packSessions: saved.packSessions ?? {}, unlockedPack: saved.unlockedPack ?? 1 } }
+    catch { return { seen: [], packSessions: {}, unlockedPack: 1 } }
+  })
+  const isPackedCourse = (language === 'fr' || language === 'es') && level === 'beginner'
+  const activeProgress = language === 'es' ? spanishProgress : progress
+  const maxPack = language === 'fr' ? 4 : 1
   const session = useMemo(() => {
     const languagePool = lessons.filter((lesson) => lesson.language === language)
     let pool = level === 'mixed' ? languagePool : languagePool.filter((lesson) => lesson.level === level)
-    if (language === 'fr' && level === 'beginner') {
+    if ((language === 'fr' || language === 'es') && level === 'beginner') {
       pool = pool.filter((lesson) => lesson.packOrder === packOrder)
-      const unseen = pool.filter((lesson) => !progress.seen.includes(lesson.id))
+      const seen = language === 'es' ? spanishProgress.seen : progress.seen
+      const unseen = pool.filter((lesson) => !seen.includes(lesson.id))
       if (unseen.length >= SESSION_LENGTH) pool = unseen
     }
     return variedSession(pool, level === 'mixed')
@@ -185,23 +193,23 @@ export default function App() {
 
   const next = (result: ExerciseResult) => {
     setScores((current) => [...current, result])
-    if (language === 'fr' && level === 'beginner') {
-      const seen = [...new Set([...progress.seen, session[position].id])]
-      const packSessions = { ...progress.packSessions, [packOrder]: (progress.packSessions[packOrder] ?? 0) + (position === session.length - 1 ? 1 : 0) }
-      const packSeen = seen.filter((id) => id.startsWith(`fr-beginner-0${packOrder}-`)).length
-      const unlockedPack = packSeen >= 20 && packSessions[packOrder] >= 2 ? Math.max(progress.unlockedPack, Math.min(packOrder + 1, 4)) : progress.unlockedPack
+    if (isPackedCourse) {
+      const seen = [...new Set([...activeProgress.seen, session[position].id])]
+      const packSessions = { ...activeProgress.packSessions, [packOrder]: (activeProgress.packSessions[packOrder] ?? 0) + (position === session.length - 1 ? 1 : 0) }
+      const packSeen = seen.filter((id) => id.startsWith(`${language}-beginner-0${packOrder}-`)).length
+      const unlockedPack = packSeen >= 20 && packSessions[packOrder] >= 2 ? Math.max(activeProgress.unlockedPack, Math.min(packOrder + 1, maxPack)) : activeProgress.unlockedPack
       const updated = { seen, packSessions, unlockedPack }
-      setProgress(updated)
-      localStorage.setItem('echo-progress-fr-beginner', JSON.stringify(updated))
+      if (language === 'es') setSpanishProgress(updated); else setProgress(updated)
+      localStorage.setItem(`echo-progress-${language}-beginner`, JSON.stringify(updated))
     }
     setPosition((current) => current + 1)
   }
   const encounter = () => {
-    if (language !== 'fr' || level !== 'beginner') return
-    const seen = [...new Set([...progress.seen, session[position].id])]
-    const updated = { ...progress, seen }
-    setProgress(updated)
-    localStorage.setItem('echo-progress-fr-beginner', JSON.stringify(updated))
+    if (!isPackedCourse) return
+    const seen = [...new Set([...activeProgress.seen, session[position].id])]
+    const updated = { ...activeProgress, seen }
+    if (language === 'es') setSpanishProgress(updated); else setProgress(updated)
+    localStorage.setItem(`echo-progress-${language}-beginner`, JSON.stringify(updated))
   }
   const restart = () => { setPosition(0); setScores([]); setSessionKey((key) => key + 1) }
   const changeLevel = (choice: LevelChoice) => { setLevel(choice); setPosition(0); setScores([]); setSessionKey((key) => key + 1) }
@@ -209,8 +217,8 @@ export default function App() {
   const changeMode = (choice: ExerciseMode) => { setMode(choice); setPosition(0); setScores([]); setSessionKey((key) => key + 1) }
   const finished = position >= session.length
   const averageScore = scores.length ? Math.round(scores.reduce((sum, result) => sum + result.score, 0) / scores.length) : 0
-  const currentPackSeen = progress.seen.filter((id) => id.startsWith(`fr-beginner-0${packOrder}-`)).length
-  const currentPackSessions = progress.packSessions[packOrder] ?? 0
+  const currentPackSeen = activeProgress.seen.filter((id) => id.startsWith(`${language}-beginner-0${packOrder}-`)).length
+  const currentPackSessions = activeProgress.packSessions[packOrder] ?? 0
 
   return <div className="app-shell">
     <nav>
@@ -233,21 +241,23 @@ export default function App() {
           <option value="intermediate">Intermediate</option>
           <option value="advanced">Advanced</option>
         </select>
-      </label>{language === 'fr' && level === 'beginner' && <label className="level-picker">Pack
+      </label>{isPackedCourse && <label className="level-picker">Pack
         <select value={packOrder} onChange={(event) => { setPackOrder(Number(event.target.value)); setPosition(0); setScores([]); setSessionKey((key) => key + 1) }}>
           <option value="1">1 · Introductions</option>
-          <option value="2" disabled={progress.unlockedPack < 2}>2 · Café {progress.unlockedPack < 2 ? '🔒' : ''}</option>
-          <option value="3" disabled={progress.unlockedPack < 3}>3 · Shopping {progress.unlockedPack < 3 ? '🔒' : ''}</option>
-          <option value="4" disabled={progress.unlockedPack < 4}>4 · Transport {progress.unlockedPack < 4 ? '🔒' : ''}</option>
+          {language === 'fr' && <>
+            <option value="2" disabled={progress.unlockedPack < 2}>2 · Café {progress.unlockedPack < 2 ? '🔒' : ''}</option>
+            <option value="3" disabled={progress.unlockedPack < 3}>3 · Shopping {progress.unlockedPack < 3 ? '🔒' : ''}</option>
+            <option value="4" disabled={progress.unlockedPack < 4}>4 · Transport {progress.unlockedPack < 4 ? '🔒' : ''}</option>
+          </>}
         </select>
       </label>}</div>
     </nav>
     {finished ? <main className="card summary">
       <p className="eyebrow">Session complete</p><h1>Nice listening.</h1><p className="summary-copy">Take a breath. Notice what felt clearer on the second listen. Your next session will use the {level} {language === 'es' ? 'Spanish' : language === 'de' ? 'German' : 'French'} phrase collection.</p>
-      {language === 'fr' && level === 'beginner' && <p className="course-progress">Pack {packOrder} · {currentPackSeen} of 25 encountered · {currentPackSessions} sessions<br />{packOrder < 4 ? (progress.unlockedPack > packOrder ? `Pack ${packOrder + 1} is unlocked.` : `Encounter 20 phrases across two sessions to unlock Pack ${packOrder + 1}.`) : 'You have reached the newest available pack.'}</p>}
+      {isPackedCourse && <p className="course-progress">Pack {packOrder} · {currentPackSeen} of 25 encountered · {currentPackSessions} sessions<br />{packOrder < maxPack ? (activeProgress.unlockedPack > packOrder ? `Pack ${packOrder + 1} is unlocked.` : `Encounter 20 phrases across two sessions to unlock Pack ${packOrder + 1}.`) : 'You have reached the newest available pack.'}</p>}
       <div className="summary-grid"><div><strong>{averageScore}%</strong><span>{mode === 'dictation' ? 'Average dictation' : 'Translation match'}</span></div><div><strong>{scores.length}</strong><span>Exercises completed</span></div></div>
       <button className="primary" type="button" onClick={restart}>Start Another Session</button>
-    </main> : <Exercise key={`${session[position].id}-${mode}`} lesson={session[position]} position={position} mode={mode} onComplete={next} onEncounter={encounter} unlockProgress={language === 'fr' && level === 'beginner' && packOrder < 4 ? { seen: currentPackSeen, sessions: currentPackSessions, unlocked: progress.unlockedPack > packOrder, nextPack: packOrder + 1 } : undefined} />}
+    </main> : <Exercise key={`${session[position].id}-${mode}`} lesson={session[position]} position={position} mode={mode} onComplete={next} onEncounter={encounter} unlockProgress={isPackedCourse && packOrder < maxPack ? { seen: currentPackSeen, sessions: currentPackSessions, unlocked: activeProgress.unlockedPack > packOrder, nextPack: packOrder + 1 } : undefined} />}
     <footer>Hear it. Understand it. Make it yours.</footer>
   </div>
 }
