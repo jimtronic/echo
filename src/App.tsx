@@ -172,7 +172,7 @@ export default function App() {
       const seen = [...new Set([...progress.seen, session[position].id])]
       const packSessions = { ...progress.packSessions, [packOrder]: (progress.packSessions[packOrder] ?? 0) + (position === session.length - 1 ? 1 : 0) }
       const packSeen = seen.filter((id) => id.startsWith(`fr-beginner-0${packOrder}-`)).length
-      const unlockedPack = packSeen >= 20 && packSessions[packOrder] >= 2 ? Math.max(progress.unlockedPack, Math.min(packOrder + 1, 3)) : progress.unlockedPack
+      const unlockedPack = packSeen >= 20 && packSessions[packOrder] >= 2 ? Math.max(progress.unlockedPack, Math.min(packOrder + 1, 4)) : progress.unlockedPack
       const updated = { seen, packSessions, unlockedPack }
       setProgress(updated)
       localStorage.setItem('echo-progress-fr-beginner', JSON.stringify(updated))
@@ -216,15 +216,16 @@ export default function App() {
           <option value="1">1 · Introductions</option>
           <option value="2" disabled={progress.unlockedPack < 2}>2 · Café {progress.unlockedPack < 2 ? '🔒' : ''}</option>
           <option value="3" disabled={progress.unlockedPack < 3}>3 · Shopping {progress.unlockedPack < 3 ? '🔒' : ''}</option>
+          <option value="4" disabled={progress.unlockedPack < 4}>4 · Transport {progress.unlockedPack < 4 ? '🔒' : ''}</option>
         </select>
       </label>}</div>
     </nav>
     {finished ? <main className="card summary">
       <p className="eyebrow">Session complete</p><h1>Nice listening.</h1><p className="summary-copy">Take a breath. Notice what felt clearer on the second listen. Your next session will use the {level} {language === 'es' ? 'Spanish' : language === 'de' ? 'German' : 'French'} phrase collection.</p>
-      {language === 'fr' && level === 'beginner' && <p className="course-progress">Pack {packOrder} · {currentPackSeen} of 25 encountered · {currentPackSessions} sessions<br />{packOrder < 3 ? (progress.unlockedPack > packOrder ? `Pack ${packOrder + 1} is unlocked.` : `Encounter 20 phrases across two sessions to unlock Pack ${packOrder + 1}.`) : 'You have reached the newest available pack.'}</p>}
+      {language === 'fr' && level === 'beginner' && <p className="course-progress">Pack {packOrder} · {currentPackSeen} of 25 encountered · {currentPackSessions} sessions<br />{packOrder < 4 ? (progress.unlockedPack > packOrder ? `Pack ${packOrder + 1} is unlocked.` : `Encounter 20 phrases across two sessions to unlock Pack ${packOrder + 1}.`) : 'You have reached the newest available pack.'}</p>}
       <div className="summary-grid"><div><strong>{dictationAverage}%</strong><span>Average dictation</span></div><div><strong>{translationAverage}%</strong><span>Translation match</span></div><div><strong>{scores.length}</strong><span>Exercises completed</span></div></div>
       <button className="primary" type="button" onClick={restart}>Start Another Session</button>
-    </main> : <Exercise key={session[position].id} lesson={session[position]} position={position} onComplete={next} onEncounter={encounter} unlockProgress={language === 'fr' && level === 'beginner' && packOrder < 3 ? { seen: currentPackSeen, sessions: currentPackSessions, unlocked: progress.unlockedPack > packOrder, nextPack: packOrder + 1 } : undefined} />}
+    </main> : <Exercise key={session[position].id} lesson={session[position]} position={position} onComplete={next} onEncounter={encounter} unlockProgress={language === 'fr' && level === 'beginner' && packOrder < 4 ? { seen: currentPackSeen, sessions: currentPackSessions, unlocked: progress.unlockedPack > packOrder, nextPack: packOrder + 1 } : undefined} />}
     <footer>Hear it. Understand it. Make it yours.</footer>
   </div>
 }
