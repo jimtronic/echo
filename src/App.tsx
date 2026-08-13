@@ -213,6 +213,11 @@ export default function App() {
           <option value="es">Spanish</option>
           <option value="de">German</option>
         </select>
+      </label><label className="level-picker">Exercise
+        <select value={mode} onChange={(event) => changeMode(event.target.value as ExerciseMode)}>
+          <option value="dictation">Dictation</option>
+          <option value="translation">Translation</option>
+        </select>
       </label><label className="level-picker">Level
         <select value={level} onChange={(event) => changeLevel(event.target.value as LevelChoice)}>
           <option value="mixed">Mixed</option>
@@ -229,10 +234,6 @@ export default function App() {
         </select>
       </label>}</div>
     </nav>
-    <div className="mode-switch" aria-label="Exercise mode">
-      <button type="button" className={mode === 'dictation' ? 'selected' : ''} aria-pressed={mode === 'dictation'} onClick={() => changeMode('dictation')}>Dictation</button>
-      <button type="button" className={mode === 'translation' ? 'selected' : ''} aria-pressed={mode === 'translation'} onClick={() => changeMode('translation')}>Translation</button>
-    </div>
     {finished ? <main className="card summary">
       <p className="eyebrow">Session complete</p><h1>Nice listening.</h1><p className="summary-copy">Take a breath. Notice what felt clearer on the second listen. Your next session will use the {level} {language === 'es' ? 'Spanish' : language === 'de' ? 'German' : 'French'} phrase collection.</p>
       {language === 'fr' && level === 'beginner' && <p className="course-progress">Pack {packOrder} · {currentPackSeen} of 25 encountered · {currentPackSessions} sessions<br />{packOrder < 4 ? (progress.unlockedPack > packOrder ? `Pack ${packOrder + 1} is unlocked.` : `Encounter 20 phrases across two sessions to unlock Pack ${packOrder + 1}.`) : 'You have reached the newest available pack.'}</p>}
