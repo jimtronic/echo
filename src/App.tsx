@@ -13,6 +13,14 @@ type ExerciseMode = 'dictation' | 'translation'
 interface ExerciseResult { score: number }
 interface CourseProgress { seen: string[]; packSessions: Record<number, number>; unlockedPack: number }
 
+function lessonLanguageNames(locale: string): { languageName: string; localeName: string } {
+  const normalized = locale.replace('_', '-')
+  const [base, region] = normalized.split('-')
+  if (base.toLowerCase() === 'es' && ['419', 'CO', 'AR', 'MX'].includes(region?.toUpperCase())) return { languageName: 'Latin American Spanish', localeName: region === '419' ? 'Spanish (Latin America)' : new Intl.DisplayNames(['en'], { type: 'language' }).of(normalized) ?? 'Latin American Spanish' }
+  const names = new Intl.DisplayNames(['en'], { type: 'language' })
+  return { languageName: names.of(base) ?? base, localeName: names.of(normalized) ?? names.of(base) ?? normalized }
+}
+
 function shuffle<T>(items: T[]): T[] {
   const result = [...items]
   for (let index = result.length - 1; index > 0; index -= 1) {
@@ -63,8 +71,7 @@ function Exercise({ lesson, position, mode, onComplete, onEncounter }: { lesson:
   const translationScore = checked ? scoreAnswer(translation, bestTranslation) : 0
   const activeScore = mode === 'dictation' ? dictationScore : translationScore
   const { play, togglePause, state, playbackState, voices, selectedVoice, setSelectedVoice } = useLessonAudio(lesson.audio, lesson.sentence, lesson.language, speed)
-  const languageName = lesson.language.toLowerCase().startsWith('es-') && lesson.language !== 'es-ES' ? 'Latin American Spanish' : lesson.language.toLowerCase().startsWith('es') ? 'Spanish' : lesson.language.toLowerCase().startsWith('de') ? 'German' : lesson.language.toLowerCase().startsWith('it') ? 'Italian' : 'French'
-  const localeName = lesson.language === 'es-CO' ? 'Spanish (Colombia)' : lesson.language === 'es-419' ? 'Spanish (Latin America)' : lesson.language === 'es' || lesson.language === 'es-ES' ? 'Spanish (Spain)' : lesson.language.startsWith('de') ? 'German (Germany)' : lesson.language.startsWith('it') ? 'Italian (Italy)' : 'French (France)'
+  const { languageName, localeName } = lessonLanguageNames(lesson.language)
 
   const submit = (event: FormEvent) => { event.preventDefault(); setChecked(true); onEncounter() }
 

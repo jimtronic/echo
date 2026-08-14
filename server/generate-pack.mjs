@@ -31,7 +31,7 @@ export async function generatePack({ scenario, language = 'auto', level = 'begin
   const apiKey = process.env.OPENAI_API_KEY
   if (!apiKey) throw new Error('Custom pack generation is not configured yet.')
   if (typeof scenario !== 'string' || scenario.trim().length < 5 || scenario.length > 300) throw new Error('Please describe a scenario in 5–300 characters.')
-  if (!['auto', 'fr-FR', 'es-ES', 'es-419', 'de-DE', 'it-IT'].includes(language)) throw new Error('Unsupported language selection.')
+  if (!['auto', 'fr-FR', 'es-ES', 'es-419', 'de-DE', 'it-IT', 'ja-JP'].includes(language)) throw new Error('Unsupported language selection.')
   if (!['beginner', 'intermediate', 'advanced'].includes(level)) throw new Error('Unsupported level selection.')
   const avoid = existingSentences.slice(-100).map((sentence) => `- ${sentence}`).join('\n')
   const prompt = `Create exactly 25 natural listening exercises for Echo.\nScenario: ${scenario.trim()}\nLanguage override: ${language === 'auto' ? 'Infer the most likely target language and regional locale from the scenario.' : language}\nLevel: ${level}\n\nEach sentence must be something a learner is genuinely likely to hear or say in that scenario. Use natural contemporary language, varied speakers and intentions, useful repetition without templated monotony, concise English translations, and helpful usage notes. Keep beginner sentences short and accessible. IDs must be unique. Do not include answers in metadata beyond the requested lesson fields.${avoid ? `\n\nDo not repeat these existing sentences:\n${avoid}` : ''}`

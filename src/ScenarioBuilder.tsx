@@ -57,7 +57,7 @@ export function ScenarioBuilder({ onPractice, initialPack = null }: { onPractice
         </label>
         <div className="scenario-options">
           <label>Language<select value={language} onChange={(event) => setLanguage(event.target.value)}>
-            <option value="auto">Auto-detect</option><option value="fr-FR">French</option><option value="es-ES">Spanish — Spain</option><option value="es-419">Spanish — Latin America</option><option value="de-DE">German</option><option value="it-IT">Italian</option>
+            <option value="auto">Auto-detect</option><option value="fr-FR">French</option><option value="es-ES">Spanish — Spain</option><option value="es-419">Spanish — Latin America</option><option value="de-DE">German</option><option value="it-IT">Italian</option><option value="ja-JP">Japanese</option>
           </select></label>
           <label>Level<select value={level} onChange={(event) => setLevel(event.target.value as Lesson['level'])}><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select></label>
         </div>
