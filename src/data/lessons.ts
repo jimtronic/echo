@@ -10,11 +10,12 @@ import spanishBeginner01 from './packs/es-beginner-01.json'
 import spanishBeginner02 from './packs/es-beginner-02.json'
 import colombianSpanishBeginner01 from './packs/es-co-beginner-01.json'
 import latinAmericanLandscapePainter01 from './packs/es-419-beginner-landscape-painter-01.json'
+import latinAmericanRecordShop01 from './packs/es-419-beginner-record-shop-01.json'
 
 function loadLessons(): Lesson[] {
   const packedFrenchBeginner = [frenchBeginner01, frenchBeginner02, frenchBeginner03, frenchBeginner04].flatMap((pack) => pack.lessons.map((lesson) => ({ ...lesson, language: 'fr', level: 'beginner' as const, packId: pack.id, packOrder: pack.order }) as Lesson))
   const packedSpanishBeginner = [spanishBeginner01, spanishBeginner02].flatMap((pack) => pack.lessons.map((lesson) => ({ ...lesson, language: 'es', level: 'beginner' as const, packId: pack.id, packOrder: pack.order }) as Lesson))
-  const packedColombianSpanishBeginner = [colombianSpanishBeginner01, latinAmericanLandscapePainter01].flatMap((pack) => pack.lessons.map((lesson) => ({ ...lesson, language: 'es-CO', level: 'beginner' as const, packId: pack.id, packOrder: pack.order }) as Lesson))
+  const packedColombianSpanishBeginner = [colombianSpanishBeginner01, latinAmericanLandscapePainter01, latinAmericanRecordShop01].flatMap((pack) => pack.lessons.map((lesson) => ({ ...lesson, language: 'es-CO', level: 'beginner' as const, packId: pack.id, packOrder: pack.order }) as Lesson))
   const loaded = [...packedFrenchBeginner, ...packedSpanishBeginner, ...packedColombianSpanishBeginner, ...frenchLessons.filter((lesson) => lesson.level !== 'beginner'), ...spanishLessons.filter((lesson) => lesson.level !== 'beginner'), ...germanLessons]
   const ids = new Set<string>()
 
@@ -29,7 +30,7 @@ function loadLessons(): Lesson[] {
   const expectedCounts: Record<string, Record<Lesson['level'], number>> = {
     fr: { beginner: 100, intermediate: 87, advanced: 71 },
     es: { beginner: 50, intermediate: 87, advanced: 71 },
-    'es-CO': { beginner: 50, intermediate: 0, advanced: 0 },
+    'es-CO': { beginner: 75, intermediate: 0, advanced: 0 },
     de: { beginner: 87, intermediate: 87, advanced: 71 }
   }
   for (const language of Object.keys(expectedCounts)) for (const level of ['beginner', 'intermediate', 'advanced'] as const) {

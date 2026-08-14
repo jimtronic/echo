@@ -180,7 +180,7 @@ export default function App() {
   })
   const isPackedCourse = (language === 'fr' || language === 'es' || language === 'es-CO') && level === 'beginner'
   const activeProgress = language === 'es' ? spanishProgress : language === 'es-CO' ? colombianProgress : progress
-  const maxPack = language === 'fr' ? 4 : 2
+  const maxPack = language === 'fr' ? 4 : language === 'es-CO' ? 3 : 2
   const session = useMemo(() => {
     const languagePool = lessons.filter((lesson) => lesson.language === language)
     let pool = level === 'mixed' ? languagePool : languagePool.filter((lesson) => lesson.level === level)
@@ -256,6 +256,7 @@ export default function App() {
           </>}
           {language === 'es' && <option value="2" disabled={spanishProgress.unlockedPack < 2}>2 · Café {spanishProgress.unlockedPack < 2 ? '🔒' : ''}</option>}
           {language === 'es-CO' && <option value="2" disabled={colombianProgress.unlockedPack < 2}>2 · Landscape painting {colombianProgress.unlockedPack < 2 ? '🔒' : ''}</option>}
+          {language === 'es-CO' && <option value="3" disabled={colombianProgress.unlockedPack < 3}>3 · Record shopping {colombianProgress.unlockedPack < 3 ? '🔒' : ''}</option>}
         </select>
       </label>}</div>
     </nav>
