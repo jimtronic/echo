@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 import type { Lesson } from './types'
 
 export interface CustomPack {
@@ -15,6 +15,15 @@ export interface CustomPack {
 
 const examples = ['Shopping for records in Buenos Aires', 'Chatting about landscape painting in France', 'Ordering breakfast in Madrid', 'Meeting my partner’s family in Colombia']
 
+function GenerationProgress({ seconds, more = false }: { seconds: number; more?: boolean }) {
+  const stage = seconds < 7 ? 'Understanding your scenario…' : seconds < 16 ? 'Writing 25 natural phrases…' : seconds < 26 ? 'Adding translations and language notes…' : 'Checking level, variety, and usefulness…'
+  return <div className="generation-progress" role="status" aria-live="polite">
+    <div><strong>{more ? 'Expanding your pack' : 'Creating your scenario'}</strong><span>{seconds}s</span></div>
+    <div className="generation-track" aria-hidden="true"><span /></div>
+    <p>{stage}</p>
+  </div>
+}
+
 function normalizePack(raw: Omit<CustomPack, 'scenario' | 'lessons'> & { lessons: Array<Omit<Lesson, 'language' | 'level' | 'audio'>> }, scenario: string, offset = 0): CustomPack {
   return {
     ...raw, scenario,
@@ -28,7 +37,15 @@ export function ScenarioBuilder({ onPractice, initialPack = null }: { onPractice
   const [level, setLevel] = useState<Lesson['level']>('beginner')
   const [pack, setPack] = useState<CustomPack | null>(initialPack)
   const [loading, setLoading] = useState(false)
+  const [generationSeconds, setGenerationSeconds] = useState(0)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (!loading) return
+    setGenerationSeconds(0)
+    const timer = window.setInterval(() => setGenerationSeconds((seconds) => seconds + 1), 1000)
+    return () => window.clearInterval(timer)
+  }, [loading])
 
   const requestPack = async (more = false) => {
     setLoading(true); setError('')
@@ -62,6 +79,7 @@ export function ScenarioBuilder({ onPractice, initialPack = null }: { onPractice
           <label>Level<select value={level} onChange={(event) => setLevel(event.target.value as Lesson['level'])}><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select></label>
         </div>
         <button className="primary" type="submit" disabled={loading || scenario.trim().length < 5}>{loading ? 'Creating 25 exercises…' : 'Create exercises'}</button>
+        {loading && <GenerationProgress seconds={generationSeconds} />}
         <p className="scenario-review-note">Submitted scenarios may be reviewed by the Echo administrator to improve the experience. Don’t include private or identifying information.</p>
       </form>
       <div className="scenario-examples"><span>Try an example</span>{examples.map((example) => <button type="button" key={example} onClick={() => setScenario(example)}>{example}</button>)}</div>
@@ -74,6 +92,7 @@ export function ScenarioBuilder({ onPractice, initialPack = null }: { onPractice
         <div>{pack.targetVocabulary.map((word) => <span key={word}>{word}</span>)}</div>
       </div>
       <button className="secondary" type="button" disabled={loading} onClick={() => void requestPack(true)}>{loading ? 'Generating…' : 'Generate 25 more'}</button>
+      {loading && <GenerationProgress seconds={generationSeconds} more />}
       <button className="text-button" type="button" onClick={() => setPack(null)}>Try another scenario</button>
     </section>}
     {error && <p className="generation-error" role="alert">{error}</p>}

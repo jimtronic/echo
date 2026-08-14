@@ -77,6 +77,14 @@ textarea::placeholder { color: #a4aaa6; }
 .pack-vocabulary > div { display: flex; flex-wrap: wrap; gap: 7px; }
 .pack-vocabulary span { padding: 6px 9px; border: 1px solid #d9d7ce; border-radius: 8px; color: #355448; background: #fffdf8; font-size: 13px; }
 .generation-error { margin-top: 18px; padding: 12px 14px; border-radius: 10px; color: #914d3c; background: #f8e4dd; font-size: 13px; }
+.generation-progress { display: grid; gap: 8px; padding: 15px 16px; border: 1px solid #dedbd2; border-radius: 12px; color: #53685e; background: #f3f1eb; }
+.generation-progress > div:first-child { display: flex; align-items: center; justify-content: space-between; }
+.generation-progress strong { color: #315746; font-size: 13px; }
+.generation-progress span { color: #89938e; font-size: 11px; }
+.generation-progress p { margin: 0; color: #718078; font-size: 12px; }
+.generation-track { position: relative; height: 7px; overflow: hidden; border-radius: 99px; background: #deddd6; }
+.generation-track span { position: absolute; inset-block: 0; width: 42%; border-radius: inherit; background: #d66e4b; animation: generation-slide 1.5s ease-in-out infinite; }
+@keyframes generation-slide { from { transform: translateX(-105%); } to { transform: translateX(345%); } }
 .saved-packs { display: grid; gap: 12px; margin-top: 30px; }
 .saved-packs article { display: grid; grid-template-columns: minmax(0, 1fr) 112px; gap: 20px; align-items: center; padding: 20px; border: 1px solid #e1ded5; border-radius: 16px; background: rgba(255,255,255,.72); }
 .saved-packs h2, .empty-library h2 { margin: 0 0 7px; color: #274d3e; font: 500 22px Georgia, serif; }
@@ -130,4 +138,4 @@ footer { text-align: center; color: #88948d; font-family: Georgia, serif; font-s
 @media (max-width: 520px) { .scenario-page > h1, .generated-pack h1 { font-size: 38px; } .scenario-options { grid-template-columns: 1fr; } }
 @media (max-width: 520px) { .saved-packs article { grid-template-columns: 1fr; } .saved-pack-actions { grid-template-columns: 1fr auto; align-items: center; } }
 @media (max-width: 580px) { nav { align-items: flex-start; } .session-pickers { align-items: flex-end; flex-direction: column; gap: 6px; } }
-@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } .generation-track span { width: 100%; animation: none; } }
