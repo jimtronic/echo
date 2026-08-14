@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react'
 import type { Lesson } from './types'
 import { samplePacks } from './data/samplePacks'
+import { clearPackLink, copyPackLink } from './lib/packLinks'
 
 export interface CustomPack {
   id: string
@@ -38,6 +39,9 @@ export function ScenarioBuilder({ onPractice, initialPack = null }: { onPractice
   const [loading, setLoading] = useState(false)
   const [generationSeconds, setGenerationSeconds] = useState(0)
   const [error, setError] = useState('')
+  const [shareStatus, setShareStatus] = useState('')
+
+  useEffect(() => { if (initialPack) setPack(initialPack) }, [initialPack])
 
   useEffect(() => {
     if (!loading) return
@@ -70,6 +74,11 @@ export function ScenarioBuilder({ onPractice, initialPack = null }: { onPractice
     setError('')
   }
 
+  const share = async (selectedPack: CustomPack) => {
+    try { await copyPackLink(selectedPack); setShareStatus('Link copied') }
+    catch { setShareStatus('Could not copy the link') }
+  }
+
   return <main className="scenario-page">
     {!pack ? <>
       <p className="eyebrow">Practice anything</p>
@@ -94,13 +103,15 @@ export function ScenarioBuilder({ onPractice, initialPack = null }: { onPractice
       <p className="eyebrow">Your custom practice</p><h1>{pack.title}</h1><p>{pack.description}</p>
       <div className="pack-facts"><span>{pack.locale}</span><span>{pack.level}</span><span>{pack.lessons.length} exercises</span></div>
       <button className="primary" type="button" onClick={() => onPractice(pack)}>Start practicing</button>
+      <button className="secondary share-pack" type="button" onClick={() => void share(pack)}>Copy link to this pack</button>
+      {shareStatus && <p className="share-status" role="status">{shareStatus}</p>}
       <div className="pack-vocabulary">
         <h2>Vocabulary in this pack</h2>
         <div>{pack.targetVocabulary.map((word) => <span key={word}>{word}</span>)}</div>
       </div>
       <button className="secondary" type="button" disabled={loading} onClick={() => void requestPack(true)}>{loading ? 'Generating…' : 'Generate 25 more'}</button>
       {loading && <GenerationProgress seconds={generationSeconds} more />}
-      <button className="text-button" type="button" onClick={() => setPack(null)}>Try another scenario</button>
+      <button className="text-button" type="button" onClick={() => { clearPackLink(); setPack(null) }}>Try another scenario</button>
     </section>}
     {error && <p className="generation-error" role="alert">{error}</p>}
   </main>
@@ -121,7 +132,7 @@ export function CustomPackLibrary({ onPractice }: { onPractice: (pack: CustomPac
     <p className="eyebrow">Saved on this device</p><h1>My packs</h1>
     {packs.length ? <div className="saved-packs">{packs.map((pack) => <article key={pack.id}>
       <div><h2>{pack.title}</h2><p>{pack.description}</p><div className="pack-facts"><span>{pack.locale}</span><span>{pack.level}</span><span>{pack.lessons.length} exercises</span></div></div>
-      <div className="saved-pack-actions"><button className="primary" type="button" onClick={() => onPractice(pack)}>Practice</button><button className="text-button" type="button" onClick={() => remove(pack)}>Remove</button></div>
+      <div className="saved-pack-actions"><button className="primary" type="button" onClick={() => onPractice(pack)}>Practice</button><button className="secondary" type="button" onClick={() => void copyPackLink(pack)}>Copy link</button><button className="text-button" type="button" onClick={() => remove(pack)}>Remove</button></div>
     </article>)}</div> : <div className="empty-library"><h2>No saved packs yet</h2><p>Create a scenario and it will appear here automatically.</p></div>}
   </main>
 }

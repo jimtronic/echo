@@ -1,9 +1,10 @@
-import { FormEvent, useMemo, useState } from 'react'
+import { FormEvent, useEffect, useMemo, useState } from 'react'
 import { lessons } from './data/lessons'
 import { useLessonAudio } from './lib/audio'
 import { diffWords, scoreAnswer } from './lib/scoring'
 import { CustomPackLibrary, ScenarioBuilder, type CustomPack } from './ScenarioBuilder'
 import type { Lesson } from './types'
+import { clearPackLink, packFromCurrentLink } from './lib/packLinks'
 
 const SESSION_LENGTH = 10
 const CUSTOM_PACKS_ENABLED = import.meta.env.DEV || import.meta.env.VITE_CUSTOM_PACKS === 'true'
@@ -204,6 +205,15 @@ export default function App() {
   const [position, setPosition] = useState(0)
   const [scores, setScores] = useState<ExerciseResult[]>([])
 
+  useEffect(() => {
+    if (!CUSTOM_PACKS_ENABLED) return
+    void packFromCurrentLink().then((linkedPack) => {
+      if (!linkedPack) return
+      setCustomPack(linkedPack)
+      setExperience('scenario')
+    })
+  }, [])
+
   const next = (result: ExerciseResult) => {
     setScores((current) => [...current, result])
     if (isPackedCourse) {
@@ -244,12 +254,12 @@ export default function App() {
   </div>
 
   if (experience === 'library') return <div className="app-shell">
-    <nav><div className="brand"><span className="brand-mark" aria-hidden="true">◖</span> echo</div><button className="nav-action" type="button" onClick={() => { setCustomPack(null); setExperience('scenario') }}>New scenario</button></nav>
+    <nav><div className="brand"><span className="brand-mark" aria-hidden="true">◖</span> echo</div><button className="nav-action" type="button" onClick={() => { clearPackLink(); setCustomPack(null); setExperience('scenario') }}>New scenario</button></nav>
     <CustomPackLibrary onPractice={startCustom} /><footer>Hear it. Understand it. Make it yours.</footer>
   </div>
 
   if (experience === 'custom' && customPack) return <div className="app-shell">
-    <nav><div className="brand"><span className="brand-mark" aria-hidden="true">◖</span> echo</div><div className="nav-links"><button className="nav-action" type="button" onClick={() => setExperience('library')}>My packs</button><button className="nav-action" type="button" onClick={() => { setCustomPack(null); setExperience('scenario') }}>New scenario</button></div></nav>
+    <nav><div className="brand"><span className="brand-mark" aria-hidden="true">◖</span> echo</div><div className="nav-links"><button className="nav-action" type="button" onClick={() => setExperience('library')}>My packs</button><button className="nav-action" type="button" onClick={() => { clearPackLink(); setCustomPack(null); setExperience('scenario') }}>New scenario</button></div></nav>
     {customFinished ? <main className="card summary"><p className="eyebrow">Session complete</p><h1>Nice listening.</h1><p className="summary-copy">You practiced {customPack.title.toLowerCase()}. The pack has {customPack.lessons.length} exercises, so another session will bring a different mix.</p><div className="summary-grid"><div><strong>{customAverage}%</strong><span>{mode === 'dictation' ? 'Average dictation' : 'Translation match'}</span></div><div><strong>{customScores.length}</strong><span>Exercises completed</span></div></div><button className="primary" type="button" onClick={() => { setCustomPosition(0); setCustomScores([]); setCustomSessionKey((key) => key + 1) }}>Practice another 10</button><button className="secondary" type="button" onClick={() => setExperience('scenario')}>Create or expand a scenario</button></main> :
       <Exercise key={`${customSession[customPosition].id}-${mode}`} lesson={customSession[customPosition]} position={customPosition} mode={mode} onComplete={nextCustom} onEncounter={() => {}} />}
     <footer>Hear it. Understand it. Make it yours.</footer>
