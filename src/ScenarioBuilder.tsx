@@ -68,6 +68,10 @@ export function ScenarioBuilder({ onPractice, initialPack = null }: { onPractice
       <p className="eyebrow">Your custom practice</p><h1>{pack.title}</h1><p>{pack.description}</p>
       <div className="pack-facts"><span>{pack.locale}</span><span>{pack.level}</span><span>{pack.lessons.length} exercises</span></div>
       <button className="primary" type="button" onClick={() => onPractice(pack)}>Start practicing</button>
+      <div className="pack-vocabulary">
+        <h2>Vocabulary in this pack</h2>
+        <div>{pack.targetVocabulary.map((word) => <span key={word}>{word}</span>)}</div>
+      </div>
       <button className="secondary" type="button" disabled={loading} onClick={() => void requestPack(true)}>{loading ? 'Generating…' : 'Generate 25 more'}</button>
       <button className="text-button" type="button" onClick={() => setPack(null)}>Try another scenario</button>
     </section>}

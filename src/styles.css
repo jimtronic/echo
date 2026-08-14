@@ -70,6 +70,10 @@ textarea::placeholder { color: #a4aaa6; }
 .generated-pack { display: grid; gap: 14px; max-width: 590px; }
 .pack-facts { display: flex; flex-wrap: wrap; gap: 8px; margin: 7px 0 12px; }
 .pack-facts span { padding: 7px 10px; border-radius: 99px; color: #52675d; background: #eae9e3; font-size: 11px; text-transform: capitalize; }
+.pack-vocabulary { margin: 5px 0 8px; padding: 16px; border-radius: 13px; background: #f1f0ea; }
+.pack-vocabulary h2 { margin: 0 0 11px; color: #718078; font-size: 10px; letter-spacing: .09em; text-transform: uppercase; }
+.pack-vocabulary > div { display: flex; flex-wrap: wrap; gap: 7px; }
+.pack-vocabulary span { padding: 6px 9px; border: 1px solid #d9d7ce; border-radius: 8px; color: #355448; background: #fffdf8; font-size: 13px; }
 .generation-error { margin-top: 18px; padding: 12px 14px; border-radius: 10px; color: #914d3c; background: #f8e4dd; font-size: 13px; }
 .feedback { border-top: 1px solid #e3e0d8; margin-top: 23px; padding-top: 23px; display: grid; gap: 18px; }
 .answer-block { padding: 16px; border-radius: 13px; background: #f3f1eb; }
