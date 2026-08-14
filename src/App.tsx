@@ -2,9 +2,11 @@ import { FormEvent, useMemo, useState } from 'react'
 import { lessons } from './data/lessons'
 import { useLessonAudio } from './lib/audio'
 import { diffWords, scoreAnswer } from './lib/scoring'
+import { ScenarioBuilder, type CustomPack } from './ScenarioBuilder'
 import type { Lesson } from './types'
 
 const SESSION_LENGTH = 10
+const CUSTOM_PACKS_ENABLED = import.meta.env.DEV || import.meta.env.VITE_CUSTOM_PACKS === 'true'
 type LevelChoice = Lesson['level'] | 'mixed'
 type LanguageChoice = 'fr' | 'es' | 'es-CO' | 'de'
 type ExerciseMode = 'dictation' | 'translation'
@@ -156,6 +158,11 @@ function Exercise({ lesson, position, mode, onComplete, onEncounter }: { lesson:
 }
 
 export default function App() {
+  const [experience, setExperience] = useState<'scenario' | 'courses' | 'custom'>(CUSTOM_PACKS_ENABLED ? 'scenario' : 'courses')
+  const [customPack, setCustomPack] = useState<CustomPack | null>(null)
+  const [customPosition, setCustomPosition] = useState(0)
+  const [customScores, setCustomScores] = useState<ExerciseResult[]>([])
+  const [customSessionKey, setCustomSessionKey] = useState(0)
   const [sessionKey, setSessionKey] = useState(0)
   const [language, setLanguage] = useState<LanguageChoice>('fr')
   const [level, setLevel] = useState<LevelChoice>('beginner')
@@ -218,10 +225,27 @@ export default function App() {
   const averageScore = scores.length ? Math.round(scores.reduce((sum, result) => sum + result.score, 0) / scores.length) : 0
   const currentPackSeen = lessons.filter((lesson) => lesson.language === language && lesson.level === 'beginner' && lesson.packOrder === packOrder && activeProgress.seen.includes(lesson.id)).length
   const currentPackSessions = activeProgress.packSessions[packOrder] ?? 0
+  const customSession = useMemo(() => customPack ? variedSession(customPack.lessons, false) : [], [customPack, customSessionKey])
+  const customFinished = customPack && customPosition >= customSession.length
+  const customAverage = customScores.length ? Math.round(customScores.reduce((sum, result) => sum + result.score, 0) / customScores.length) : 0
+  const startCustom = (pack: CustomPack) => { setCustomPack(pack); setCustomPosition(0); setCustomScores([]); setCustomSessionKey((key) => key + 1); setExperience('custom') }
+  const nextCustom = (result: ExerciseResult) => { setCustomScores((current) => [...current, result]); setCustomPosition((current) => current + 1) }
+
+  if (experience === 'scenario') return <div className="app-shell">
+    <nav><div className="brand"><span className="brand-mark" aria-hidden="true">◖</span> echo</div><button className="nav-action" type="button" onClick={() => setExperience('courses')}>Browse courses</button></nav>
+    <ScenarioBuilder onPractice={startCustom} initialPack={customPack} /><footer>Hear it. Understand it. Make it yours.</footer>
+  </div>
+
+  if (experience === 'custom' && customPack) return <div className="app-shell">
+    <nav><div className="brand"><span className="brand-mark" aria-hidden="true">◖</span> echo</div><button className="nav-action" type="button" onClick={() => { setCustomPack(null); setExperience('scenario') }}>New scenario</button></nav>
+    {customFinished ? <main className="card summary"><p className="eyebrow">Session complete</p><h1>Nice listening.</h1><p className="summary-copy">You practiced {customPack.title.toLowerCase()}. The pack has {customPack.lessons.length} exercises, so another session will bring a different mix.</p><div className="summary-grid"><div><strong>{customAverage}%</strong><span>{mode === 'dictation' ? 'Average dictation' : 'Translation match'}</span></div><div><strong>{customScores.length}</strong><span>Exercises completed</span></div></div><button className="primary" type="button" onClick={() => { setCustomPosition(0); setCustomScores([]); setCustomSessionKey((key) => key + 1) }}>Practice another 10</button><button className="secondary" type="button" onClick={() => setExperience('scenario')}>Create or expand a scenario</button></main> :
+      <Exercise key={`${customSession[customPosition].id}-${mode}`} lesson={customSession[customPosition]} position={customPosition} mode={mode} onComplete={nextCustom} onEncounter={() => {}} />}
+    <footer>Hear it. Understand it. Make it yours.</footer>
+  </div>
 
   return <div className="app-shell">
     <nav>
-      <div className="brand"><span className="brand-mark" aria-hidden="true">◖</span> echo</div>
+      <div><div className="brand"><span className="brand-mark" aria-hidden="true">◖</span> echo</div>{CUSTOM_PACKS_ENABLED && <button className="nav-action course-create" type="button" onClick={() => setExperience('scenario')}>Practice a scenario</button>}</div>
       <div className="session-pickers"><label className="level-picker">Language
         <select value={language} onChange={(event) => changeLanguage(event.target.value as LanguageChoice)}>
           <option value="fr">French</option>

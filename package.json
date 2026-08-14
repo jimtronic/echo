@@ -4,9 +4,10 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node --env-file-if-exists=.env server/index.mjs --dev",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "node server/index.mjs",
+    "start": "node server/index.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",

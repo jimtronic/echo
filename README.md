@@ -17,6 +17,14 @@ npm run dev
 
 Open the URL Vite prints (normally <http://localhost:5173>).
 
+Custom scenario packs require an OpenAI API key in a local `.env` file:
+
+```bash
+OPENAI_API_KEY=your_api_key_here
+```
+
+The key is used only by Echo's Node server. Never expose it through a `VITE_` environment variable. Each scenario generates 25 lessons and can be expanded in additional groups of 25.
+
 For a production build check:
 
 ```bash
@@ -26,11 +34,11 @@ npm run preview
 
 ## Deploy to Render
 
-Echo includes a `render.yaml` Blueprint for a free Render Static Site. Connect the repository in Render and create a Blueprint, or configure a Static Site manually with:
+Echo includes a `render.yaml` Blueprint for a Render Node Web Service. Add `OPENAI_API_KEY` as a secret environment variable, then use:
 
 ```text
-Build command: npm ci && npm run build
-Publish directory: dist
+Build command: npm ci && VITE_CUSTOM_PACKS=true npm run build
+Start command: npm start
 ```
 
 ## Audio
