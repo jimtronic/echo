@@ -62,6 +62,7 @@ export function ScenarioBuilder({ onPractice, initialPack = null }: { onPractice
           <label>Level<select value={level} onChange={(event) => setLevel(event.target.value as Lesson['level'])}><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select></label>
         </div>
         <button className="primary" type="submit" disabled={loading || scenario.trim().length < 5}>{loading ? 'Creating 25 exercises…' : 'Create exercises'}</button>
+        <p className="scenario-review-note">Submitted scenarios may be reviewed by the Echo administrator to improve the experience. Don’t include private or identifying information.</p>
       </form>
       <div className="scenario-examples"><span>Try an example</span>{examples.map((example) => <button type="button" key={example} onClick={() => setScenario(example)}>{example}</button>)}</div>
     </> : <section className="generated-pack">

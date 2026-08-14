@@ -27,6 +27,8 @@ The key is used only by Echo's Node server. Never expose it through a `VITE_` en
 
 The prototype limits each client to 10 generation requests per hour in server memory. Use persistent rate limiting before substantially widening public access.
 
+For concept validation, submitted scenario text, language, level, continuation status, and generation outcome are written to the private Render service logs. Echo does not log learner answers or generated lesson contents, and the scenario form discloses this review.
+
 For a production build check:
 
 ```bash

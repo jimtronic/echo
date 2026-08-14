@@ -28,8 +28,17 @@ const server = createServer(async (request, response) => {
     if (request.url === '/health') { response.writeHead(200, { 'Content-Type': 'application/json' }); response.end('{"status":"ok"}'); return }
     if (request.url === '/api/generate-pack' && request.method === 'POST') {
       checkGenerationLimit(request)
-      const pack = await generatePack(await jsonBody(request))
-      response.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); response.end(JSON.stringify(pack)); return
+      const payload = await jsonBody(request)
+      const event = { scenario: typeof payload.scenario === 'string' ? payload.scenario.trim() : '', language: payload.language ?? 'auto', level: payload.level ?? 'beginner', continuation: Array.isArray(payload.existingSentences) && payload.existingSentences.length > 0 }
+      console.info('echo_scenario_request', JSON.stringify(event))
+      try {
+        const pack = await generatePack(payload)
+        console.info('echo_scenario_success', JSON.stringify({ ...event, generatedLocale: pack.locale, generatedTitle: pack.title }))
+        response.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); response.end(JSON.stringify(pack)); return
+      } catch (error) {
+        console.warn('echo_scenario_failure', JSON.stringify({ ...event, error: error instanceof Error ? error.message : 'Unexpected error.' }))
+        throw error
+      }
     }
     if (request.url?.startsWith('/api/')) { response.writeHead(404); response.end(); return }
     if (vite) { vite.middlewares(request, response, () => {}); return }

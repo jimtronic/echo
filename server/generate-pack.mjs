@@ -39,6 +39,7 @@ export async function generatePack({ scenario, language = 'auto', level = 'begin
     method: 'POST', headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: process.env.OPENAI_PACK_MODEL ?? 'gpt-5.6-terra',
+      store: false,
       input: [{ role: 'system', content: 'You are an expert language educator and native-quality lesson editor. Return only the requested structured pack.' }, { role: 'user', content: prompt }],
       reasoning: { effort: 'low' },
       text: { format: { type: 'json_schema', name: 'echo_pack', strict: true, schema: packSchema } }
