@@ -78,3 +78,23 @@ export function ScenarioBuilder({ onPractice, initialPack = null }: { onPractice
     {error && <p className="generation-error" role="alert">{error}</p>}
   </main>
 }
+
+export function CustomPackLibrary({ onPractice }: { onPractice: (pack: CustomPack) => void }) {
+  const [packs, setPacks] = useState<CustomPack[]>(() => Object.keys(localStorage)
+    .filter((key) => key.startsWith('echo-custom-pack-'))
+    .flatMap((key) => { try { return [JSON.parse(localStorage.getItem(key) ?? '') as CustomPack] } catch { return [] } })
+    .sort((a, b) => a.title.localeCompare(b.title)))
+
+  const remove = (pack: CustomPack) => {
+    localStorage.removeItem(`echo-custom-pack-${pack.id}`)
+    setPacks((current) => current.filter((candidate) => candidate.id !== pack.id))
+  }
+
+  return <main className="scenario-page pack-library">
+    <p className="eyebrow">Saved on this device</p><h1>My packs</h1>
+    {packs.length ? <div className="saved-packs">{packs.map((pack) => <article key={pack.id}>
+      <div><h2>{pack.title}</h2><p>{pack.description}</p><div className="pack-facts"><span>{pack.locale}</span><span>{pack.level}</span><span>{pack.lessons.length} exercises</span></div></div>
+      <div className="saved-pack-actions"><button className="primary" type="button" onClick={() => onPractice(pack)}>Practice</button><button className="text-button" type="button" onClick={() => remove(pack)}>Remove</button></div>
+    </article>)}</div> : <div className="empty-library"><h2>No saved packs yet</h2><p>Create a scenario and it will appear here automatically.</p></div>}
+  </main>
+}
