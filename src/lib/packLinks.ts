@@ -38,9 +38,26 @@ export async function packFromCurrentLink(): Promise<CustomPack | null> {
   }
 }
 
-export async function copyPackLink(pack: CustomPack): Promise<void> {
-  const link = await createPackLink(pack)
-  await navigator.clipboard.writeText(link)
+export async function copyLink(link: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(link)
+    return true
+  } catch {
+    const field = document.createElement('textarea')
+    field.value = link
+    field.setAttribute('readonly', '')
+    field.style.position = 'fixed'
+    field.style.opacity = '0'
+    document.body.append(field)
+    field.select()
+    const copied = document.execCommand('copy')
+    field.remove()
+    return copied
+  }
+}
+
+export function showPackLinkInAddressBar(link: string): void {
+  history.replaceState(null, '', link)
 }
 
 export function clearPackLink(): void {

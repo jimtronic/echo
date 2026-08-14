@@ -207,11 +207,14 @@ export default function App() {
 
   useEffect(() => {
     if (!CUSTOM_PACKS_ENABLED) return
-    void packFromCurrentLink().then((linkedPack) => {
-      if (!linkedPack) return
-      setCustomPack(linkedPack)
-      setExperience('scenario')
-    })
+    const openLinkedPack = () => void packFromCurrentLink().then((linkedPack) => {
+        if (!linkedPack) return
+        setCustomPack(linkedPack)
+        setExperience('scenario')
+      })
+    openLinkedPack()
+    window.addEventListener('hashchange', openLinkedPack)
+    return () => window.removeEventListener('hashchange', openLinkedPack)
   }, [])
 
   const next = (result: ExerciseResult) => {
