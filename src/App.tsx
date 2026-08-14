@@ -63,8 +63,8 @@ function Exercise({ lesson, position, mode, onComplete, onEncounter }: { lesson:
   const translationScore = checked ? scoreAnswer(translation, bestTranslation) : 0
   const activeScore = mode === 'dictation' ? dictationScore : translationScore
   const { play, togglePause, state, playbackState, voices, selectedVoice, setSelectedVoice } = useLessonAudio(lesson.audio, lesson.sentence, lesson.language, speed)
-  const languageName = lesson.language === 'es-CO' ? 'Latin American Spanish' : lesson.language === 'es' ? 'Spanish' : lesson.language === 'de' ? 'German' : 'French'
-  const localeName = lesson.language === 'es-CO' ? 'Spanish (Colombia)' : lesson.language === 'es' ? 'Spanish (Spain)' : lesson.language === 'de' ? 'German (Germany)' : 'French (France)'
+  const languageName = lesson.language.toLowerCase().startsWith('es-') && lesson.language !== 'es-ES' ? 'Latin American Spanish' : lesson.language.toLowerCase().startsWith('es') ? 'Spanish' : lesson.language.toLowerCase().startsWith('de') ? 'German' : lesson.language.toLowerCase().startsWith('it') ? 'Italian' : 'French'
+  const localeName = lesson.language === 'es-CO' ? 'Spanish (Colombia)' : lesson.language === 'es-419' ? 'Spanish (Latin America)' : lesson.language === 'es' || lesson.language === 'es-ES' ? 'Spanish (Spain)' : lesson.language.startsWith('de') ? 'German (Germany)' : lesson.language.startsWith('it') ? 'Italian (Italy)' : 'French (France)'
 
   const submit = (event: FormEvent) => { event.preventDefault(); setChecked(true); onEncounter() }
 

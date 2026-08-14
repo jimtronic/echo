@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 type AudioState = 'checking' | 'file' | 'speech' | 'unavailable'
 
 export function useLessonAudio(audioPath: string, hiddenSentence: string, language: string, speed: number) {
+  const baseLanguage = language.split('-')[0].toLowerCase()
   const audio = useMemo(() => new Audio(audioPath), [audioPath])
   const [state, setState] = useState<AudioState>('checking')
   const [playbackState, setPlaybackState] = useState<'idle' | 'playing' | 'paused'>('idle')
@@ -12,11 +13,11 @@ export function useLessonAudio(audioPath: string, hiddenSentence: string, langua
 
   useEffect(() => {
     if (!('speechSynthesis' in window)) return
-    const updateVoices = () => setVoices(window.speechSynthesis.getVoices().filter((voice) => voice.lang.toLowerCase().startsWith(language.toLowerCase())))
+    const updateVoices = () => setVoices(window.speechSynthesis.getVoices().filter((voice) => voice.lang.toLowerCase().startsWith(baseLanguage)))
     updateVoices()
     window.speechSynthesis.addEventListener('voiceschanged', updateVoices)
     return () => window.speechSynthesis.removeEventListener('voiceschanged', updateVoices)
-  }, [language])
+  }, [baseLanguage])
 
   const setSelectedVoice = useCallback((voiceURI: string) => {
     setSelectedVoiceState(voiceURI)
@@ -69,16 +70,16 @@ export function useLessonAudio(audioPath: string, hiddenSentence: string, langua
       const browserVoices = window.speechSynthesis.getVoices()
       utterance.voice = browserVoices.find((voice) => voice.voiceURI === selectedVoice)
         ?? browserVoices.find((voice) => voice.lang.toLowerCase() === preferredLocale.toLowerCase())
-        ?? browserVoices.find((voice) => voice.lang.toLowerCase().startsWith(language))
+        ?? browserVoices.find((voice) => voice.lang.toLowerCase().startsWith(baseLanguage))
         ?? null
-      if (browserVoices.length > 0 && !utterance.voice && !browserVoices.some((voice) => voice.lang.toLowerCase().startsWith(language))) {
+      if (browserVoices.length > 0 && !utterance.voice && !browserVoices.some((voice) => voice.lang.toLowerCase().startsWith(baseLanguage))) {
         setState('unavailable')
         return
       }
       window.speechSynthesis.speak(utterance)
       setState('speech')
     }
-  }, [audio, hiddenSentence, language, selectedVoice, speed, state])
+  }, [audio, baseLanguage, hiddenSentence, language, selectedVoice, speed, state])
 
   const togglePause = useCallback(async () => {
     if (playbackState === 'playing') {
