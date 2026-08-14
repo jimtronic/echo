@@ -48,7 +48,7 @@ function variedSession(pool: Lesson[], mixed: boolean): Lesson[] {
   return selected
 }
 
-function Exercise({ lesson, position, mode, onComplete, onEncounter, unlockProgress }: { lesson: Lesson; position: number; mode: ExerciseMode; onComplete: (result: ExerciseResult) => void; onEncounter: () => void; unlockProgress?: { seen: number; sessions: number; unlocked: boolean; nextPack: number } }) {
+function Exercise({ lesson, position, mode, onComplete, onEncounter }: { lesson: Lesson; position: number; mode: ExerciseMode; onComplete: (result: ExerciseResult) => void; onEncounter: () => void }) {
   const [dictation, setDictation] = useState('')
   const [translation, setTranslation] = useState('')
   const [checked, setChecked] = useState(false)
@@ -68,11 +68,6 @@ function Exercise({ lesson, position, mode, onComplete, onEncounter, unlockProgr
 
   return <main className="card">
     <header className="exercise-header"><span>Exercise {position + 1} of {SESSION_LENGTH}</span><span className="language">{languageName} · {lesson.level}</span></header>
-    {unlockProgress && <section className="unlock-progress" aria-label={`Progress toward unlocking Pack ${unlockProgress.nextPack}`}>
-      <div><span>{unlockProgress.unlocked ? `Pack ${unlockProgress.nextPack} unlocked` : `Progress to Pack ${unlockProgress.nextPack}`}</span><strong>{unlockProgress.unlocked ? '100%' : `${Math.round((Math.min(unlockProgress.seen / 20, 1) + Math.min(unlockProgress.sessions / 2, 1)) * 50)}%`}</strong></div>
-      <progress max="100" value={unlockProgress.unlocked ? 100 : (Math.min(unlockProgress.seen / 20, 1) + Math.min(unlockProgress.sessions / 2, 1)) * 50} />
-      <p>{Math.min(unlockProgress.seen, 20)} of 20 phrases · {Math.min(unlockProgress.sessions, 2)} of 2 sessions</p>
-    </section>}
     <section className="listening" aria-label="Audio controls">
       <div className="play-row">
         <button className="play" type="button" onClick={() => void play()} aria-label="Play exercise audio"><span aria-hidden="true">▶</span> Play</button>
@@ -250,22 +245,22 @@ export default function App() {
         <select value={packOrder} onChange={(event) => { setPackOrder(Number(event.target.value)); setPosition(0); setScores([]); setSessionKey((key) => key + 1) }}>
           <option value="1">1 · Introductions</option>
           {language === 'fr' && <>
-            <option value="2" disabled={progress.unlockedPack < 2}>2 · Café {progress.unlockedPack < 2 ? '🔒' : ''}</option>
-            <option value="3" disabled={progress.unlockedPack < 3}>3 · Shopping {progress.unlockedPack < 3 ? '🔒' : ''}</option>
-            <option value="4" disabled={progress.unlockedPack < 4}>4 · Transport {progress.unlockedPack < 4 ? '🔒' : ''}</option>
+            <option value="2">2 · Café</option>
+            <option value="3">3 · Shopping</option>
+            <option value="4">4 · Transport</option>
           </>}
-          {language === 'es' && <option value="2" disabled={spanishProgress.unlockedPack < 2}>2 · Café {spanishProgress.unlockedPack < 2 ? '🔒' : ''}</option>}
-          {language === 'es-CO' && <option value="2" disabled={colombianProgress.unlockedPack < 2}>2 · Landscape painting {colombianProgress.unlockedPack < 2 ? '🔒' : ''}</option>}
-          {language === 'es-CO' && <option value="3" disabled={colombianProgress.unlockedPack < 3}>3 · Record shopping {colombianProgress.unlockedPack < 3 ? '🔒' : ''}</option>}
+          {language === 'es' && <option value="2">2 · Café</option>}
+          {language === 'es-CO' && <option value="2">2 · Landscape painting</option>}
+          {language === 'es-CO' && <option value="3">3 · Record shopping</option>}
         </select>
       </label>}</div>
     </nav>
     {finished ? <main className="card summary">
       <p className="eyebrow">Session complete</p><h1>Nice listening.</h1><p className="summary-copy">Take a breath. Notice what felt clearer on the second listen. Your next session will use the {level} {language === 'es-CO' ? 'Latin American Spanish' : language === 'es' ? 'Spanish' : language === 'de' ? 'German' : 'French'} phrase collection.</p>
-      {isPackedCourse && <p className="course-progress">Pack {packOrder} · {currentPackSeen} of 25 encountered · {currentPackSessions} sessions<br />{packOrder < maxPack ? (activeProgress.unlockedPack > packOrder ? `Pack ${packOrder + 1} is unlocked.` : `Encounter 20 phrases across two sessions to unlock Pack ${packOrder + 1}.`) : 'You have reached the newest available pack.'}</p>}
+      {isPackedCourse && <p className="course-progress">Pack {packOrder} · {currentPackSeen} of 25 encountered · {currentPackSessions} sessions<br />All packs are available.</p>}
       <div className="summary-grid"><div><strong>{averageScore}%</strong><span>{mode === 'dictation' ? 'Average dictation' : 'Translation match'}</span></div><div><strong>{scores.length}</strong><span>Exercises completed</span></div></div>
       <button className="primary" type="button" onClick={restart}>Start Another Session</button>
-    </main> : <Exercise key={`${session[position].id}-${mode}`} lesson={session[position]} position={position} mode={mode} onComplete={next} onEncounter={encounter} unlockProgress={isPackedCourse && packOrder < maxPack ? { seen: currentPackSeen, sessions: currentPackSessions, unlocked: activeProgress.unlockedPack > packOrder, nextPack: packOrder + 1 } : undefined} />}
+    </main> : <Exercise key={`${session[position].id}-${mode}`} lesson={session[position]} position={position} mode={mode} onComplete={next} onEncounter={encounter} />}
     <footer>Hear it. Understand it. Make it yours.</footer>
   </div>
 }
