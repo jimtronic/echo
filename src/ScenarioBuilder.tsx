@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useState } from 'react'
 import type { Lesson } from './types'
+import { samplePacks } from './data/samplePacks'
 
 export interface CustomPack {
   id: string
@@ -12,8 +13,6 @@ export interface CustomPack {
   scenario: string
   lessons: Lesson[]
 }
-
-const examples = ['Shopping for records in Buenos Aires', 'Chatting about landscape painting in France', 'Ordering breakfast in Madrid', 'Meeting my partner’s family in Colombia']
 
 function GenerationProgress({ seconds, more = false }: { seconds: number; more?: boolean }) {
   const stage = seconds < 7 ? 'Understanding your scenario…' : seconds < 16 ? 'Writing 25 natural phrases…' : seconds < 26 ? 'Adding translations and language notes…' : 'Checking level, variety, and usefulness…'
@@ -63,6 +62,14 @@ export function ScenarioBuilder({ onPractice, initialPack = null }: { onPractice
 
   const submit = (event: FormEvent) => { event.preventDefault(); if (scenario.trim()) void requestPack() }
 
+  const openSample = (sample: CustomPack) => {
+    setScenario(sample.scenario)
+    setLanguage(sample.locale)
+    setLevel(sample.level)
+    setPack(sample)
+    setError('')
+  }
+
   return <main className="scenario-page">
     {!pack ? <>
       <p className="eyebrow">Practice anything</p>
@@ -82,7 +89,7 @@ export function ScenarioBuilder({ onPractice, initialPack = null }: { onPractice
         {loading && <GenerationProgress seconds={generationSeconds} />}
         <p className="scenario-review-note">Submitted scenarios may be reviewed by the Echo administrator to improve the experience. Don’t include private or identifying information.</p>
       </form>
-      <div className="scenario-examples"><span>Try an example</span>{examples.map((example) => <button type="button" key={example} onClick={() => setScenario(example)}>{example}</button>)}</div>
+      <div className="scenario-examples"><span>Try an instant sample — no generation wait</span>{samplePacks.map((sample) => <button type="button" key={sample.id} onClick={() => openSample(sample)}><strong>{sample.scenario}</strong><small>{sample.locale} · {sample.lessons.length} exercises</small></button>)}</div>
     </> : <section className="generated-pack">
       <p className="eyebrow">Your custom practice</p><h1>{pack.title}</h1><p>{pack.description}</p>
       <div className="pack-facts"><span>{pack.locale}</span><span>{pack.level}</span><span>{pack.lessons.length} exercises</span></div>

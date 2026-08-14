@@ -68,7 +68,9 @@ textarea::placeholder { color: #a4aaa6; }
 .scenario-review-note { margin: -6px 3px 0; color: #89938e; font-size: 11px; line-height: 1.45; text-align: center; }
 .scenario-examples { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
 .scenario-examples > span { width: 100%; margin-bottom: 3px; color: #8a958f; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
-.scenario-examples button { border: 1px solid #d9d8d1; border-radius: 99px; padding: 8px 12px; color: #4d665b; background: rgba(255,255,255,.65); font-size: 12px; }
+.scenario-examples button { display: grid; gap: 3px; border: 1px solid #d9d8d1; border-radius: 14px; padding: 10px 13px; color: #4d665b; background: rgba(255,255,255,.65); text-align: left; font-size: 12px; }
+.scenario-examples button strong { font-weight: 600; }
+.scenario-examples button small { color: #89938e; font-size: 10px; text-transform: uppercase; letter-spacing: .04em; }
 .generated-pack { display: grid; gap: 14px; max-width: 590px; }
 .pack-facts { display: flex; flex-wrap: wrap; gap: 8px; margin: 7px 0 12px; }
 .pack-facts span { padding: 7px 10px; border-radius: 99px; color: #52675d; background: #eae9e3; font-size: 11px; text-transform: capitalize; }
