@@ -25,6 +25,8 @@ OPENAI_API_KEY=your_api_key_here
 
 The key is used only by Echo's Node server. Never expose it through a `VITE_` environment variable. Each scenario generates 25 lessons and can be expanded in additional groups of 25.
 
+The prototype limits each client to 10 generation requests per hour in server memory. Use persistent rate limiting before substantially widening public access.
+
 For a production build check:
 
 ```bash
