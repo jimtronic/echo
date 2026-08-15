@@ -5,6 +5,7 @@ import { diffWords, scoreAnswer } from './lib/scoring'
 import { CustomPackLibrary, ScenarioBuilder, type CustomPack } from './ScenarioBuilder'
 import type { Lesson } from './types'
 import { clearPackLink, packFromCurrentLink } from './lib/packLinks'
+import { savePackSessionScore } from './lib/packScores'
 
 const SESSION_LENGTH = 10
 const CUSTOM_PACKS_ENABLED = import.meta.env.DEV || import.meta.env.VITE_CUSTOM_PACKS === 'true'
@@ -249,7 +250,19 @@ export default function App() {
   const customFinished = customPack && customPosition >= customSession.length
   const customAverage = customScores.length ? Math.round(customScores.reduce((sum, result) => sum + result.score, 0) / customScores.length) : 0
   const startCustom = (pack: CustomPack) => { setCustomPack(pack); setCustomPosition(0); setCustomScores([]); setCustomSessionKey((key) => key + 1); setExperience('custom') }
-  const nextCustom = (result: ExerciseResult) => { setCustomScores((current) => [...current, result]); setCustomPosition((current) => current + 1) }
+  const nextCustom = (result: ExerciseResult) => {
+    const completedScores = [...customScores, result]
+    setCustomScores(completedScores)
+    if (customPack && customPosition === customSession.length - 1) {
+      savePackSessionScore(customPack.id, {
+        completedAt: new Date().toISOString(),
+        mode,
+        average: Math.round(completedScores.reduce((sum, score) => sum + score.score, 0) / completedScores.length),
+        exercises: completedScores.length,
+      })
+    }
+    setCustomPosition((current) => current + 1)
+  }
 
   if (experience === 'scenario') return <div className="app-shell">
     <nav><div className="brand"><span className="brand-mark" aria-hidden="true">◖</span> echo</div><button className="nav-action" type="button" onClick={() => setExperience('library')}>My packs</button></nav>

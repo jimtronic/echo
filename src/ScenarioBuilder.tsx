@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useState } from 'react'
 import type { Lesson } from './types'
 import { samplePacks } from './data/samplePacks'
 import { clearPackLink, copyLink, createPackLink, showPackLinkInAddressBar } from './lib/packLinks'
+import { packScoreSummary } from './lib/packScores'
 
 export interface CustomPack {
   id: string
@@ -140,10 +141,15 @@ export function CustomPackLibrary({ onPractice }: { onPractice: (pack: CustomPac
   return <main className="scenario-page pack-library">
     <p className="eyebrow">Saved on this device</p><h1>My packs</h1>
     {packs.length ? <div className="saved-packs">{packs.map((pack) => <article key={pack.id}>
-      <div><h2>{pack.title}</h2><p>{pack.description}</p><div className="pack-facts"><span>{pack.locale}</span><span>{pack.level}</span><span>{pack.lessons.length} exercises</span></div></div>
+      <div><h2>{pack.title}</h2><p>{pack.description}</p><div className="pack-facts"><span>{pack.locale}</span><span>{pack.level}</span><span>{pack.lessons.length} exercises</span></div><PackScore packId={pack.id} /></div>
       <div className="saved-pack-actions"><button className="primary" type="button" onClick={() => onPractice(pack)}>Practice</button><LibraryShareButton pack={pack} /><button className="text-button" type="button" onClick={() => remove(pack)}>Remove</button></div>
     </article>)}</div> : <div className="empty-library"><h2>No saved packs yet</h2><p>Create a scenario and it will appear here automatically.</p></div>}
   </main>
+}
+
+function PackScore({ packId }: { packId: string }) {
+  const summary = packScoreSummary(packId)
+  return summary ? <div className="pack-score"><strong>{summary.average}%</strong><span>average across {summary.sessions} {summary.sessions === 1 ? 'session' : 'sessions'}</span></div> : <div className="pack-score empty"><span>No completed sessions yet</span></div>
 }
 
 function LibraryShareButton({ pack }: { pack: CustomPack }) {

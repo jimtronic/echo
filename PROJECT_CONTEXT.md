@@ -22,6 +22,7 @@ The learning philosophy remains: hear real language, understand it, repeat it, i
 - “Generate 25 more” expands the current pack while asking the model not to repeat existing sentences.
 - Generated pack previews show the locale, level, exercise count, and target vocabulary.
 - Packs are saved in browser `localStorage` and shown under **My packs**. There are no user accounts or cross-device persistence.
+- Completed custom-pack sessions are stored locally with their date, mode, exercise count, and average. **My packs** shows each pack's exercise-weighted overall average and completed-session count. Sessions completed before this feature was added cannot be reconstructed.
 - Four reviewed, bundled samples open instantly without an API request: French transport, a Spanish café, Latin American Spanish landscape painting, and everyday German travel.
 - Packs can be shared using a self-contained URL fragment. The pack JSON is gzip-compressed and base64url-encoded after `#pack=`; fragments are not sent in normal HTTP requests. No database is needed for sharing. See `src/lib/packLinks.ts`.
 - A shared link opens the pack preview, from which the recipient can start practicing.
@@ -39,6 +40,7 @@ The learning philosophy remains: hear real language, understand it, repeat it, i
 - `src/App.tsx`: experience switching, course sessions, custom sessions, exercise UI, modes, and progress.
 - `src/ScenarioBuilder.tsx`: scenario generation form, pack preview/expansion, vocabulary, sharing actions, and local pack library.
 - `src/lib/packLinks.ts`: compressed share-link creation, decoding, clipboard fallback, and URL cleanup.
+- `src/lib/packScores.ts`: local completed-session score history and per-pack summaries.
 - `src/data/samplePacks.ts`: reviewed instant sample packs.
 - `server/index.mjs`: static/Vite server, generation endpoint, in-memory rate limiting, and private scenario event logging.
 - `server/generate-pack.mjs`: OpenAI Responses API request, structured output schema, generation prompt, and validation.
@@ -129,4 +131,3 @@ The local `.env` needs `OPENAI_API_KEY` for real custom generation. Never commit
 Use this prompt:
 
 > Read `PROJECT_CONTEXT.md` and `README.md`, inspect the recent Git history and current worktree, then continue working on Echo. Treat the code as authoritative where documentation differs.
-
