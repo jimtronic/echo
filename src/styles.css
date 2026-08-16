@@ -49,9 +49,14 @@ textarea::placeholder { color: #a4aaa6; }
 .corrected-answer h2 { margin: 0 0 9px; color: #68776e; font-size: 14px; }
 .corrected-answer .diff { font-size: 18px; }
 .corrected-answer .match-note { margin: 10px 0 0; color: #858f89; font-size: 11px; line-height: 1.4; }
-.compact-score { width: 92px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 9px; border-radius: 12px; color: #65756c; background: #f3f1eb; }
+.compact-score { width: 108px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 9px; border: 1px solid transparent; border-radius: 12px; color: #65756c; background: #f3f1eb; text-align: center; }
 .compact-score strong { font: 500 27px Georgia, serif; color: #1f493a; }
 .compact-score span { margin-top: 2px; font-size: 10px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
+.compact-score.exact, .compact-score.nearly { border-color: #c9dccc; background: #eaf3e9; }
+.compact-score.exact strong, .compact-score.nearly strong { color: #285d3f; }
+.compact-score.mostly { border-color: #e4d5ad; background: #f7f0dc; }
+.compact-score.retry { border-color: #ead0ca; background: #f8e8e4; }
+.accent-note { margin: 10px 0 0; color: #3f6d52; font-size: 12px; line-height: 1.4; }
 .primary { width: 100%; border: 0; border-radius: 12px; padding: 15px 20px; background: #d66e4b; color: #fff; font-weight: 600; margin-top: 3px; }
 .primary:hover:not(:disabled) { background: #c65d3b; }
 .primary:disabled { cursor: not-allowed; opacity: .42; }

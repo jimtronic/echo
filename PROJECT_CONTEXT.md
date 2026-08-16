@@ -29,6 +29,7 @@ The learning philosophy remains: hear real language, understand it, repeat it, i
 - Each practice session selects 10 varied exercises from the pack.
 - Dictation and translation are separate modes, not simultaneous fields.
 - Dictation scoring ignores capitalization, surrounding whitespace, apostrophe variants, and punctuation, but retains accent sensitivity. Spanish inverted punctuation is not penalized.
+- Scores also receive tutor-style feedback: Exact, Nearly exact, Mostly understood, or Keep listening. Accent-only dictation differences receive a positive “Heard it” treatment while still showing the written correction.
 - Translation uses approximate text matching against the expected and accepted translations. It is not semantic or AI grading.
 - After checking, the answer form is replaced with inline corrections and a compact score. The correct phrase, English meaning, replay control, and lesson notes appear below.
 - Playback supports 0.6×, 0.8×, and 1.0× speeds plus replay and pause/resume.

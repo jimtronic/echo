@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react'
 import { lessons } from './data/lessons'
 import { useLessonAudio } from './lib/audio'
-import { diffWords, scoreAnswer } from './lib/scoring'
+import { describeScore, diffWords, isAccentOnlyDifference, scoreAnswer } from './lib/scoring'
 import { CustomPackLibrary, ScenarioBuilder, type CustomPack } from './ScenarioBuilder'
 import type { Lesson } from './types'
 import { clearPackLink, packFromCurrentLink } from './lib/packLinks'
@@ -72,6 +72,8 @@ function Exercise({ lesson, position, mode, onComplete, onEncounter }: { lesson:
   const bestTranslation = translationOptions.reduce((best, option) => scoreAnswer(translation, option) > scoreAnswer(translation, best) ? option : best, lesson.english)
   const translationScore = checked ? scoreAnswer(translation, bestTranslation) : 0
   const activeScore = mode === 'dictation' ? dictationScore : translationScore
+  const accentOnly = checked && mode === 'dictation' && isAccentOnlyDifference(dictation, lesson.sentence)
+  const scoreDescription = describeScore(activeScore, accentOnly)
   const { play, togglePause, state, playbackState, voices, selectedVoice, setSelectedVoice } = useLessonAudio(lesson.audio, lesson.sentence, lesson.language, speed)
   const { languageName, localeName } = lessonLanguageNames(lesson.language)
 
@@ -113,10 +115,11 @@ function Exercise({ lesson, position, mode, onComplete, onEncounter }: { lesson:
           <div className="diff" aria-label={mode === 'dictation' ? 'Dictation differences' : 'Translation differences'}>
             {diffWords(mode === 'dictation' ? dictation : translation, mode === 'dictation' ? lesson.sentence : bestTranslation).map((token, index) => <span className={token.kind} key={`${token.text}-${index}`}>{token.text}</span>)}
           </div>
+          {accentOnly && <p className="accent-note">You caught every word. Check the accent marks.</p>}
           {mode === 'dictation' ? <div className="legend"><span className="missing">missing</span><span className="incorrect">changed</span><span className="extra">extra</span></div> :
             <p className="match-note">Text comparison only; natural alternative wording may score lower.</p>}
         </div>
-        <div className="compact-score"><strong>{activeScore}%</strong><span>{mode === 'dictation' ? 'Dictation' : 'Match'}</span></div>
+        <div className={`compact-score ${scoreDescription.result}`}><strong>{activeScore}%</strong><span>{scoreDescription.label}</span></div>
       </div>}
       {!checked && <button className="primary" type="submit">Check Answer</button>}
     </form>

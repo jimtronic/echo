@@ -32,6 +32,24 @@ export function scoreAnswer(answer: string, expected: string): number {
   return Math.round(100 * (1 - editDistance(a, b) / Math.max(a.length, b.length)))
 }
 
+function withoutAccents(value: string): string {
+  return normalize(value).normalize('NFD').replace(/\p{M}/gu, '')
+}
+
+export function isAccentOnlyDifference(answer: string, expected: string): boolean {
+  return normalize(answer) !== normalize(expected) && withoutAccents(answer) === withoutAccents(expected)
+}
+
+export type ScoreResult = 'exact' | 'nearly' | 'mostly' | 'retry'
+
+export function describeScore(score: number, accentOnly = false): { result: ScoreResult; label: string } {
+  if (score === 100) return { result: 'exact', label: 'Exact' }
+  if (accentOnly) return { result: 'nearly', label: 'Heard it' }
+  if (score >= 85) return { result: 'nearly', label: 'Nearly exact' }
+  if (score >= 70) return { result: 'mostly', label: 'Mostly understood' }
+  return { result: 'retry', label: 'Keep listening' }
+}
+
 export function diffWords(answer: string, expected: string): DiffToken[] {
   const actual = normalize(answer).split(' ').filter(Boolean)
   const target = normalize(expected).split(' ').filter(Boolean)
