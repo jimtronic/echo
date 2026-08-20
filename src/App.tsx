@@ -6,6 +6,7 @@ import { CustomPackLibrary, ScenarioBuilder, type CustomPack } from './ScenarioB
 import type { Lesson } from './types'
 import { clearPackLink, packFromCurrentLink } from './lib/packLinks'
 import { savePackSessionScore } from './lib/packScores'
+import { dealPackSession } from './lib/packDeck'
 
 const SESSION_LENGTH = 10
 const CUSTOM_PACKS_ENABLED = import.meta.env.DEV || import.meta.env.VITE_CUSTOM_PACKS === 'true'
@@ -33,6 +34,7 @@ function shuffle<T>(items: T[]): T[] {
 }
 
 function phraseFamily(lesson: Lesson): string {
+  if (lesson.family) return lesson.family
   const generated = lesson.id.match(/^(?:fr|es|de)-(?:beginner|intermediate|advanced)-([a-z]+)-(\d+)$/)
   if (!generated) return lesson.id
   const templateGroup = Math.floor((Number(generated[2]) - 1) / 15)
@@ -174,7 +176,7 @@ export default function App() {
   const [customPack, setCustomPack] = useState<CustomPack | null>(null)
   const [customPosition, setCustomPosition] = useState(0)
   const [customScores, setCustomScores] = useState<ExerciseResult[]>([])
-  const [customSessionKey, setCustomSessionKey] = useState(0)
+  const [customSession, setCustomSession] = useState<Lesson[]>([])
   const [sessionKey, setSessionKey] = useState(0)
   const [language, setLanguage] = useState<LanguageChoice>('fr')
   const [level, setLevel] = useState<LevelChoice>('beginner')
@@ -249,10 +251,15 @@ export default function App() {
   const averageScore = scores.length ? Math.round(scores.reduce((sum, result) => sum + result.score, 0) / scores.length) : 0
   const currentPackSeen = lessons.filter((lesson) => lesson.language === language && lesson.level === 'beginner' && lesson.packOrder === packOrder && activeProgress.seen.includes(lesson.id)).length
   const currentPackSessions = activeProgress.packSessions[packOrder] ?? 0
-  const customSession = useMemo(() => customPack ? variedSession(customPack.lessons, false) : [], [customPack, customSessionKey])
   const customFinished = customPack && customPosition >= customSession.length
   const customAverage = customScores.length ? Math.round(customScores.reduce((sum, result) => sum + result.score, 0) / customScores.length) : 0
-  const startCustom = (pack: CustomPack) => { setCustomPack(pack); setCustomPosition(0); setCustomScores([]); setCustomSessionKey((key) => key + 1); setExperience('custom') }
+  const startCustom = (pack: CustomPack) => { setCustomPack(pack); setCustomSession(variedSession(dealPackSession(pack.id, pack.lessons, SESSION_LENGTH), false)); setCustomPosition(0); setCustomScores([]); setExperience('custom') }
+  const restartCustom = () => {
+    if (!customPack) return
+    setCustomSession(variedSession(dealPackSession(customPack.id, customPack.lessons, SESSION_LENGTH), false))
+    setCustomPosition(0)
+    setCustomScores([])
+  }
   const nextCustom = (result: ExerciseResult) => {
     const completedScores = [...customScores, result]
     setCustomScores(completedScores)
@@ -279,7 +286,7 @@ export default function App() {
 
   if (experience === 'custom' && customPack) return <div className="app-shell">
     <nav><div className="brand"><span className="brand-mark" aria-hidden="true">◖</span> echo</div><div className="nav-links"><button className="nav-action" type="button" onClick={() => setExperience('library')}>My packs</button><button className="nav-action" type="button" onClick={() => { clearPackLink(); setCustomPack(null); setExperience('scenario') }}>New scenario</button></div></nav>
-    {customFinished ? <main className="card summary"><p className="eyebrow">Session complete</p><h1>Nice listening.</h1><p className="summary-copy">You practiced {customPack.title.toLowerCase()}. The pack has {customPack.lessons.length} exercises, so another session will bring a different mix.</p><div className="summary-grid"><div><strong>{customAverage}%</strong><span>{mode === 'dictation' ? 'Average dictation' : 'Translation match'}</span></div><div><strong>{customScores.length}</strong><span>Exercises completed</span></div></div><button className="primary" type="button" onClick={() => { setCustomPosition(0); setCustomScores([]); setCustomSessionKey((key) => key + 1) }}>Practice another 10</button><button className="secondary" type="button" onClick={() => setExperience('scenario')}>Create or expand a scenario</button></main> :
+    {customFinished ? <main className="card summary"><p className="eyebrow">Session complete</p><h1>Nice listening.</h1><p className="summary-copy">You practiced {customPack.title.toLowerCase()}. Echo will work through the pack before recycling exercises, so the next session should feel fresh.</p><div className="summary-grid"><div><strong>{customAverage}%</strong><span>{mode === 'dictation' ? 'Average dictation' : 'Translation match'}</span></div><div><strong>{customScores.length}</strong><span>Exercises completed</span></div></div><button className="primary" type="button" onClick={restartCustom}>Practice another 10</button><button className="secondary" type="button" onClick={() => setExperience('scenario')}>Create or expand a scenario</button></main> :
       <Exercise key={`${customSession[customPosition].id}-${mode}`} lesson={customSession[customPosition]} position={customPosition} mode={mode} onComplete={nextCustom} onEncounter={() => {}} />}
     <footer>Hear it. Understand it. Make it yours.</footer>
   </div>

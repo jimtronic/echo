@@ -27,6 +27,7 @@ The learning philosophy remains: hear real language, understand it, repeat it, i
 - Packs can be shared using a self-contained URL fragment. The pack JSON is gzip-compressed and base64url-encoded after `#pack=`; fragments are not sent in normal HTTP requests. No database is needed for sharing. See `src/lib/packLinks.ts`.
 - A shared link opens the pack preview, from which the recipient can start practicing.
 - Each practice session selects 10 varied exercises from the pack.
+- Custom packs use a persistent shuffled deck per browser: exercises are dealt once before the pack is recycled and reshuffled. This prevents accidental session-to-session repetition while allowing repetition after the learner works through the full pack.
 - Dictation and translation are separate modes, not simultaneous fields.
 - Dictation scoring ignores capitalization, surrounding whitespace, apostrophe variants, and punctuation, but retains accent sensitivity. Spanish inverted punctuation is not penalized.
 - Scores also receive tutor-style feedback: Exact, Nearly exact, Mostly understood, or Keep listening. Accent-only dictation differences receive a positive “Heard it” treatment while still showing the written correction.
@@ -42,6 +43,7 @@ The learning philosophy remains: hear real language, understand it, repeat it, i
 - `src/ScenarioBuilder.tsx`: scenario generation form, pack preview/expansion, vocabulary, sharing actions, and local pack library.
 - `src/lib/packLinks.ts`: compressed share-link creation, decoding, clipboard fallback, and URL cleanup.
 - `src/lib/packScores.ts`: local completed-session score history and per-pack summaries.
+- `src/lib/packDeck.ts`: persistent per-pack shuffled queues for custom-session variety.
 - `src/data/samplePacks.ts`: reviewed instant sample packs.
 - `server/index.mjs`: static/Vite server, generation endpoint, in-memory rate limiting, and private scenario event logging.
 - `server/generate-pack.mjs`: OpenAI Responses API request, structured output schema, generation prompt, and validation.
