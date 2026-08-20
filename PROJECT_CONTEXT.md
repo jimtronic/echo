@@ -29,7 +29,7 @@ The learning philosophy remains: hear real language, understand it, repeat it, i
 - Each practice session selects 10 varied exercises from the pack.
 - Custom packs use a persistent shuffled deck per browser: exercises are dealt once before the pack is recycled and reshuffled. This prevents accidental session-to-session repetition while allowing repetition after the learner works through the full pack.
 - Dictation and translation are separate modes, not simultaneous fields.
-- Dictation scoring ignores capitalization, surrounding whitespace, apostrophe variants, and punctuation, but retains accent sensitivity. Spanish inverted punctuation is not penalized.
+- Dictation scoring ignores capitalization, surrounding whitespace, apostrophes, and Unicode punctuation—including curly quotation marks—but retains accent sensitivity.
 - Scores also receive tutor-style feedback: Exact, Nearly exact, Mostly understood, or Keep listening. Accent-only dictation differences receive a positive “Heard it” treatment while still showing the written correction.
 - Translation uses approximate text matching against the expected and accepted translations. It is not semantic or AI grading.
 - After checking, the answer form is replaced with inline corrections and a compact score. The correct phrase, English meaning, replay control, and lesson notes appear below.

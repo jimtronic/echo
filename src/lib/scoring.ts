@@ -4,8 +4,8 @@ export interface DiffToken { text: string; kind: DiffKind }
 export function normalize(value: string): string {
   return value
     .toLocaleLowerCase('fr')
-    .replace(/[’‘]/g, "'")
-    .replace(/[.,!?¡¿;:«»"()[\]{}…—–-]/g, ' ')
+    .replace(/['’‘ʼ]/g, '')
+    .replace(/\p{P}/gu, ' ')
     .replace(/\s+/g, ' ')
     .trim()
 }
